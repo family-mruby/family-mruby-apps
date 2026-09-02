@@ -111,9 +111,15 @@ required_heap_kb_linux = 1400   # the Linux simulator and the browser
 rake            # selftest + validate + registry, exactly what CI runs
 ```
 
-`registry.json` and the `*.thumb.bmp` files are generated. Run `rake registry`
-and commit the result along with your app -- CI regenerates them and fails if
-what you committed is not what the tools produce.
+`registry.json`, `registry.tsv` and the `*.thumb.png` files are generated. Run
+`rake registry` and commit the result along with your app -- CI regenerates
+them and fails if what you committed is not what the tools produce.
+
+The two registries hold the same list. The store on a device reads the `.tsv`:
+picoruby's JSON parser needed **7.6 seconds** for the 2.8 KB JSON on an
+ESP32-P4, and splitting lines costs nothing. The `.json` is there for people
+and for tools. Both come out of your `.app.toml` in the same pass, so they
+cannot disagree -- and that is why a tab or a newline in a field is rejected.
 
 ## Things that pass on a PC and fail on the machine
 
