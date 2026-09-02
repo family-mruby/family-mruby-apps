@@ -28,7 +28,7 @@ module Registry
     base = "apps/#{id}/"
 
     shot = m["app_screenshot"] || "#{id}.png"
-    thumb = "#{id}.thumb.bmp"
+    thumb = "#{id}.thumb.png"
     GenThumb.generate(File.join(dir, shot), File.join(dir, thumb)) if generate_thumbs
 
     # Files the installer writes to the device. The manifest and the script

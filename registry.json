@@ -23,8 +23,8 @@
         "size": 5193
       },
       "thumb": {
-        "path": "hello_store.thumb.bmp",
-        "size": 1846
+        "path": "hello_store.thumb.png",
+        "size": 1088
       },
       "files": [
         {
@@ -62,8 +62,8 @@
         "size": 4049
       },
       "thumb": {
-        "path": "paint_pad.thumb.bmp",
-        "size": 1846
+        "path": "paint_pad.thumb.png",
+        "size": 791
       },
       "files": [
         {
@@ -99,8 +99,8 @@
         "size": 1460
       },
       "thumb": {
-        "path": "wide_only.thumb.bmp",
-        "size": 1846
+        "path": "wide_only.thumb.png",
+        "size": 225
       },
       "files": [
         {
