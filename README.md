@@ -12,9 +12,9 @@ One directory under `apps/`, named after the app's id:
 
 ```
 apps/paint_pad/
-├─ paint_pad.app.toml   the manifest (optional -- see "One file" below)
+├─ paint_pad.app.toml   the manifest (required -- see "Why a sidecar")
 ├─ paint_pad.app.rb     the app itself
-└─ paint_pad.png        a screenshot
+└─ paint_pad.png        a picture of the app
 ```
 
 The manifest is the same `.app.toml` the device reads, plus the keys the store
@@ -28,7 +28,6 @@ app_screen_name_ja = "おえかき"
 default_window_mode = "window"
 default_window_width = 260
 default_window_height = 170
-task_stack_kb = 32
 
 # What the store reads
 app_id = "paint_pad"                 # must match the directory name
