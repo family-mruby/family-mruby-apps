@@ -1,0 +1,23 @@
+# Keys the device itself reads.
+app_screen_name = "Paint Pad"
+app_screen_name_ja = "おえかき"
+default_window_mode = "window"
+default_window_width = 260
+default_window_height = 170
+default_window_pos_x = 10
+default_window_pos_y = 30
+task_stack_kb = 32
+
+# Keys the store reads. The device's TOML readers look keys up by name, so
+# these are ignored there (spec.md 3.1).
+app_id = "paint_pad"
+app_version = "1.0.0"
+app_author = "family-mruby"
+app_description = "Draw with the mouse, clear with the right button"
+app_description_ja = "マウスで描いて、右ボタンで消す"
+app_category = "tool"
+app_env = ["retro", "modern", "web"]
+app_min_width = 320
+app_min_height = 240
+app_license = "MIT"
+app_source = "https://github.com/family-mruby/family-mruby-apps"

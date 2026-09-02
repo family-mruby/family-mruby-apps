@@ -1,0 +1,17 @@
+app_screen_name = "Wide Only"
+app_screen_name_ja = "よこながだけ"
+default_window_mode = "fullscreen"
+
+# The specimen that must be turned away. 400 fits Modern and the browser
+# (426 wide) and does not fit Retro (320), so the store has to say so rather
+# than install something that cannot draw itself.
+app_id = "wide_only"
+app_version = "1.0.0"
+app_author = "family-mruby"
+app_description = "Needs a screen wider than Retro has"
+app_description_ja = "Retro より広い画面が要る"
+app_category = "demo"
+app_env = ["modern", "web"]
+app_min_width = 400
+app_min_height = 200
+app_license = "MIT"

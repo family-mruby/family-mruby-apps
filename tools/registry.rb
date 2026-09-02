@@ -1,0 +1,82 @@
+# Build registry.json from what is in apps/ (spec.md 5).
+#
+# The registry is a generated file. It is committed so that the store can pull
+# it straight from raw.githubusercontent.com without an API call, but nobody
+# edits it: CI regenerates it and fails if the result differs from what is in
+# the tree.
+
+require "digest"
+require "json"
+require_relative "manifest"
+require_relative "gen_thumb"
+
+module Registry
+  FORMAT_VERSION = 1
+
+  def self.build(root, generate_thumbs: true)
+    apps = Dir.children(File.join(root, "apps")).sort.filter_map do |name|
+      dir = File.join(root, "apps", name)
+      next unless File.directory?(dir)
+      entry(Manifest.load(dir), root, generate_thumbs)
+    end
+    { "format_version" => FORMAT_VERSION, "apps" => apps }
+  end
+
+  def self.entry(m, root, generate_thumbs)
+    id  = m["app_id"]
+    dir = m[:dir]
+    base = "apps/#{id}/"
+
+    shot = m["app_screenshot"] || "#{id}.png"
+    thumb = "#{id}.thumb.bmp"
+    GenThumb.generate(File.join(dir, shot), File.join(dir, thumb)) if generate_thumbs
+
+    # Files the installer writes to the device. The manifest and the script
+    # always; anything else only when the author listed it. The screenshot and
+    # the thumbnail are NOT here -- the store shows them, it does not install
+    # them.
+    names = []
+    names << File.basename(m[:toml_path]) if m[:toml_path]
+    names << File.basename(m[:script_path])
+    names.concat(Array(m["app_files"]))
+    names.uniq!
+
+    e = {}
+    e["id"]      = id
+    e["version"] = m["app_version"]
+    e["name"]    = m["app_screen_name"] || id
+    e["name_ja"] = m["app_screen_name_ja"] if m["app_screen_name_ja"]
+    e["description"]    = m["app_description"]
+    e["description_ja"] = m["app_description_ja"] if m["app_description_ja"]
+    e["category"] = m["app_category"]
+    e["author"]   = m["app_author"]
+    e["license"]  = m["app_license"] if m["app_license"]
+    e["source"]   = m["app_source"] if m["app_source"]
+    e["env"]      = m["app_env"]
+    e["min_width"]  = m["app_min_width"]  if m["app_min_width"]
+    e["min_height"] = m["app_min_height"] if m["app_min_height"]
+
+    heap = {}
+    heap["esp32"] = m["required_heap_kb_esp32"] if m["required_heap_kb_esp32"]
+    heap["linux"] = m["required_heap_kb_linux"] if m["required_heap_kb_linux"]
+    e["required_heap_kb"] = heap unless heap.empty?
+
+    e["base"] = base
+    e["screenshot"] = file_entry(dir, shot)
+    e["thumb"]      = file_entry(dir, thumb)
+    e["files"]      = names.map { |n| file_entry(dir, n) }
+    e
+  end
+
+  def self.file_entry(dir, name)
+    path = File.join(dir, name)
+    { "path" => name, "size" => File.size(path), "sha256" => Digest::SHA256.file(path).hexdigest }
+  end
+
+  # Stable output: JSON.pretty_generate keeps insertion order, and every hash
+  # above is built in a fixed order, so regenerating an unchanged tree gives a
+  # byte-identical file. That is what lets CI diff it.
+  def self.render(data)
+    JSON.pretty_generate(data) + "\n"
+  end
+end

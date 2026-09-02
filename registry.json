@@ -1,0 +1,119 @@
+{
+  "format_version": 1,
+  "apps": [
+    {
+      "id": "hello_store",
+      "version": "1.0.0",
+      "name": "Hello Store",
+      "name_ja": "こんにちは",
+      "description": "The smallest app the store can carry",
+      "category": "demo",
+      "author": "family-mruby",
+      "env": [
+        "retro",
+        "modern",
+        "web"
+      ],
+      "base": "apps/hello_store/",
+      "screenshot": {
+        "path": "hello_store.png",
+        "size": 1412,
+        "sha256": "6c3b0f343291660ec109eaf9358f8fd735fb6cbf8c1816eb5a430fea7214c41d"
+      },
+      "thumb": {
+        "path": "hello_store.thumb.bmp",
+        "size": 1846,
+        "sha256": "57cd26909634238b870072b7994ae6297a32fd5c4a9da578c267817632b5dbe8"
+      },
+      "files": [
+        {
+          "path": "hello_store.app.rb",
+          "size": 1211,
+          "sha256": "172944f7eb83b595479967991b93f45429d220be5d0e4e53793a09fa05af2072"
+        }
+      ]
+    },
+    {
+      "id": "paint_pad",
+      "version": "1.0.0",
+      "name": "Paint Pad",
+      "name_ja": "おえかき",
+      "description": "Draw with the mouse, clear with the right button",
+      "description_ja": "マウスで描いて、右ボタンで消す",
+      "category": "tool",
+      "author": "family-mruby",
+      "license": "MIT",
+      "source": "https://github.com/family-mruby/family-mruby-apps",
+      "env": [
+        "retro",
+        "modern",
+        "web"
+      ],
+      "min_width": 320,
+      "min_height": 240,
+      "base": "apps/paint_pad/",
+      "screenshot": {
+        "path": "paint_pad.png",
+        "size": 1412,
+        "sha256": "6c3b0f343291660ec109eaf9358f8fd735fb6cbf8c1816eb5a430fea7214c41d"
+      },
+      "thumb": {
+        "path": "paint_pad.thumb.bmp",
+        "size": 1846,
+        "sha256": "57cd26909634238b870072b7994ae6297a32fd5c4a9da578c267817632b5dbe8"
+      },
+      "files": [
+        {
+          "path": "paint_pad.app.toml",
+          "size": 766,
+          "sha256": "daab0e9a23551a4f46b147e8fecdd2c750bc5436f08f4bccb5dbc185ce13097b"
+        },
+        {
+          "path": "paint_pad.app.rb",
+          "size": 1869,
+          "sha256": "ac86f4b830ab28398f1ee7467856ce3f1b4b09b6e47a43ebcdeb3bb60c578342"
+        }
+      ]
+    },
+    {
+      "id": "wide_only",
+      "version": "1.0.0",
+      "name": "Wide Only",
+      "name_ja": "よこながだけ",
+      "description": "Needs a screen wider than Retro has",
+      "description_ja": "Retro より広い画面が要る",
+      "category": "demo",
+      "author": "family-mruby",
+      "license": "MIT",
+      "env": [
+        "modern",
+        "web"
+      ],
+      "min_width": 400,
+      "min_height": 200,
+      "base": "apps/wide_only/",
+      "screenshot": {
+        "path": "wide_only.png",
+        "size": 1602,
+        "sha256": "ba867c71ac305e5fffb6af8e9116e92212637479a06bf187c4ccde2c7e1289fe"
+      },
+      "thumb": {
+        "path": "wide_only.thumb.bmp",
+        "size": 1846,
+        "sha256": "057cc92d1027c0e43a27b185ed4c03b09d60099bde4b32bd28b4967e943236eb"
+      },
+      "files": [
+        {
+          "path": "wide_only.app.toml",
+          "size": 603,
+          "sha256": "55c1af6c9fdc24e3dec73b4276de1a78de3f69dd484064bf8ece9a6a0385308e"
+        },
+        {
+          "path": "wide_only.app.rb",
+          "size": 863,
+          "sha256": "f18a04cd8c9ee5ed3ad2f1d46f8b3c9154732e5740ad9b9b326ab4c47eca284b"
+        }
+      ]
+    }
+  ]
+}
