@@ -1,0 +1,10 @@
+1
+A	hello_store	1.0.0	Hello Store	こんにちは	The smallest app the store can carry	店が運べる一番小さなアプリ	demo	family-mruby	retro,modern,web					5128c9d96a0965192c6ef953d3b5840c5e377f18856028df72dfc7f0290a55db	apps/hello_store/	hello_store.thumb.png	460
+F	hello_store.app.toml	620
+F	hello_store.app.rb	1344
+A	paint_pad	1.0.0	Paint Pad	おえかき	Draw with the mouse, clear with the right button	マウスで描いて、右ボタンで消す	tool	family-mruby	retro,modern,web	320	240			46f5ef9602e79193d55d4083acefe1f43de78226d4a413d49267fc322e387c03	apps/paint_pad/	paint_pad.thumb.png	818
+F	paint_pad.app.toml	1079
+F	paint_pad.app.rb	1869
+A	wide_only	1.0.0	Wide Only	よこながだけ	Needs a screen wider than Retro has	Retro より広い画面が要る	demo	family-mruby	modern,web	400	200			8a3df05a8ee102cce81d9776a1e68045098c14b68178a006f59451e30d4e6480	apps/wide_only/	wide_only.thumb.png	171
+F	wide_only.app.toml	603
+F	wide_only.app.rb	863

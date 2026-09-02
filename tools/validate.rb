@@ -95,6 +95,15 @@ module Validate
       end
     end
 
+    # A tab or a newline would split a record in registry.tsv, which the store
+    # on a device reads instead of the JSON.
+    %w[app_id app_version app_author app_description app_description_ja
+       app_screen_name app_screen_name_ja app_category].each do |k|
+      v = m[k]
+      next unless v.is_a?(String)
+      e << "#{rel}: #{k} contains a tab or a newline" if v.include?("\t") || v.include?("\n")
+    end
+
     lic = m["app_license"]
     e << "#{rel}: app_license #{lic.inspect} is not an SPDX identifier we know" if lic && !SPDX.include?(lic)
 

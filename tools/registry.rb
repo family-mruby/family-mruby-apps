@@ -107,4 +107,56 @@ module Registry
   def self.render(data)
     JSON.pretty_generate(data) + "\n"
   end
+
+  # The same list as tab-separated lines, which is what the store on a device
+  # actually reads.
+  #
+  # JSON is not usable there: picoruby's parser took 7.6 SECONDS over this
+  # list's 2858 bytes on an ESP32-P4 (measured 2026-09-02), which is most of
+  # what "the store is slow to load" was. Lines cost a split and nothing else.
+  # The same trade was made for the RPG map, where a JSON file that took 39.5 s
+  # became 55 ms as a packed format.
+  #
+  # Both files come out of the same data here, so they cannot drift, and the
+  # JSON stays for people and for tools.
+  #
+  #   1 <TAB> format version
+  #   A <TAB> id ... thumb_size      one per app, fields in a fixed order
+  #   F <TAB> path <TAB> size        the files of the app above it, in order
+  #
+  # A reader skips a line whose first field it does not know, so a later
+  # version can add line types without breaking an older store.
+  TSV_VERSION = 1
+
+  APP_FIELDS = %w[
+    id version name name_ja description description_ja category author
+    env min_width min_height heap_esp32 heap_linux sha256 base
+    thumb_path thumb_size
+  ].freeze
+
+  def self.render_tsv(data)
+    out = "#{TSV_VERSION}\n"
+    data["apps"].each do |a|
+      heap = a["required_heap_kb"] || {}
+      thumb = a["thumb"] || {}
+      row = [
+        a["id"], a["version"], a["name"], a["name_ja"],
+        a["description"], a["description_ja"], a["category"], a["author"],
+        (a["env"] || []).join(","),
+        a["min_width"], a["min_height"], heap["esp32"], heap["linux"],
+        a["sha256"], a["base"], thumb["path"], thumb["size"],
+      ]
+      out << "A\t" << row.map { |v| field(v) }.join("\t") << "\n"
+      (a["files"] || []).each do |f|
+        out << "F\t" << field(f["path"]) << "\t" << field(f["size"]) << "\n"
+      end
+    end
+    out
+  end
+
+  # A tab or a newline in a value would split the record where it should not,
+  # so validate refuses them and this only has to turn nil into nothing.
+  def self.field(v)
+    v.nil? ? "" : v.to_s
+  end
 end

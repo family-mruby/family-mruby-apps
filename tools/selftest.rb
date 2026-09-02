@@ -42,6 +42,11 @@ module Selftest
       sub("#{d}/apps/paint_pad/paint_pad.app.toml", /^app_version = .*$/, 'app_version = "1.0"')
     }, "is not <n>.<n>.<n>"],
 
+    ["a tab in a field", ->(d) {
+      sub("#{d}/apps/paint_pad/paint_pad.app.toml", /^app_author = .*$/,
+          %(app_author = "some\tone"))
+    }, "contains a tab or a newline"],
+
     ["unknown licence", ->(d) {
       sub("#{d}/apps/paint_pad/paint_pad.app.toml", /^app_license = .*$/, 'app_license = "MIT-ish"')
     }, "is not an SPDX identifier"],

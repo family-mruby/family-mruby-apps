@@ -15,9 +15,12 @@ end
 desc "Regenerate registry.json (and the device thumbnails) from apps/"
 task registry: :validate do
   require_relative "tools/registry"
-  path = File.join(ROOT, "registry.json")
-  File.write(path, Registry.render(Registry.build(ROOT)))
-  puts "registry: wrote #{File.size(path)} bytes"
+  data = Registry.build(ROOT)
+  json = File.join(ROOT, "registry.json")
+  tsv  = File.join(ROOT, "registry.tsv")
+  File.write(json, Registry.render(data))
+  File.write(tsv, Registry.render_tsv(data))
+  puts "registry: wrote #{File.size(json)} + #{File.size(tsv)} bytes"
 end
 
 desc "Check that the checks still catch what they are meant to"
@@ -40,7 +43,7 @@ task check_registry: :registry do
   dirty = `git -C #{ROOT.inspect} status --porcelain -- registry.json apps`.split("\n")
   next if dirty.empty?
   dirty.each { |line| warn "  #{line}" }
-  abort "registry.json or a thumbnail is not what apps/ generates -- " \
+  abort "registry.json, registry.tsv or a thumbnail is not what apps/ generates -- " \
         "run `rake registry` and commit the result"
 end
 
