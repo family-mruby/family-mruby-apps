@@ -62,15 +62,43 @@ module Registry
     e["required_heap_kb"] = heap unless heap.empty?
 
     e["base"] = base
+    # One digest for the whole app rather than one per file. The machine then
+    # keeps a single digest object and makes a single comparison however many
+    # files an app grows to, and the list does not swell with them. Knowing
+    # WHICH file differs would not help: a mismatch throws the install away
+    # whole.
+    e["sha256"] = app_digest(dir, names)
     e["screenshot"] = file_entry(dir, shot)
     e["thumb"]      = file_entry(dir, thumb)
     e["files"]      = names.map { |n| file_entry(dir, n) }
     e
   end
 
+  # Paths in the order the list gives them, each framed by its own name and
+  # length before its bytes. Concatenating contents alone would let two
+  # different splits of the same stream hash alike; the framing removes that
+  # and costs a few bytes per file.
+  #
+  # The machine has to be able to reproduce this with MbedTLS::Digest, so
+  # keep it to update() calls in a fixed order and nothing cleverer.
+  def self.app_digest(dir, names)
+    d = Digest::SHA256.new
+    names.each do |name|
+      body = File.binread(File.join(dir, name))
+      d << name
+      d << "\n"
+      d << body.bytesize.to_s
+      d << "\n"
+      d << body
+    end
+    d.hexdigest
+  end
+
+  # Files carry their size but not their own digest: the size is what makes a
+  # truncated transfer visible before anything is hashed, and it is what a
+  # progress display has to work with.
   def self.file_entry(dir, name)
-    path = File.join(dir, name)
-    { "path" => name, "size" => File.size(path), "sha256" => Digest::SHA256.file(path).hexdigest }
+    { "path" => name, "size" => File.size(File.join(dir, name)) }
   end
 
   # Stable output: JSON.pretty_generate keeps insertion order, and every hash

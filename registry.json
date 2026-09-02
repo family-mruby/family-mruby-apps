@@ -17,26 +17,23 @@
         "web"
       ],
       "base": "apps/hello_store/",
+      "sha256": "5128c9d96a0965192c6ef953d3b5840c5e377f18856028df72dfc7f0290a55db",
       "screenshot": {
         "path": "hello_store.png",
-        "size": 5193,
-        "sha256": "1989f24deb372da092c784b4ec6d16b1e82bdb6d305b9aab4a3a281832b88853"
+        "size": 5193
       },
       "thumb": {
         "path": "hello_store.thumb.bmp",
-        "size": 1846,
-        "sha256": "06571f5cc0445234935a9c9a17bb8735c2da7d5442fbb6be1df0b2cc728f01e3"
+        "size": 1846
       },
       "files": [
         {
           "path": "hello_store.app.toml",
-          "size": 620,
-          "sha256": "531c207c612cea10a4cfed4a64b94ed5af2b3af89b43b4d64bf4ef719dbc9f26"
+          "size": 620
         },
         {
           "path": "hello_store.app.rb",
-          "size": 1344,
-          "sha256": "e11d18b28247ea9c45e93c430f869ffbaaa3bddebbc7a3c1c0c4e75dd2e3696b"
+          "size": 1344
         }
       ]
     },
@@ -59,26 +56,23 @@
       "min_width": 320,
       "min_height": 240,
       "base": "apps/paint_pad/",
+      "sha256": "987cf28eec5cc062bc36c242f34b41ab23b5e9e254b29c7fd993697138ee4a1c",
       "screenshot": {
         "path": "paint_pad.png",
-        "size": 4049,
-        "sha256": "8977366f990d14a9655060ca7056d53674e5f2a01c68af2cce853122b7600dae"
+        "size": 4049
       },
       "thumb": {
         "path": "paint_pad.thumb.bmp",
-        "size": 1846,
-        "sha256": "5e448de15fcdc9e068c97203332070f432f78e2e8c8d735db28307b4a6ec2415"
+        "size": 1846
       },
       "files": [
         {
           "path": "paint_pad.app.toml",
-          "size": 766,
-          "sha256": "daab0e9a23551a4f46b147e8fecdd2c750bc5436f08f4bccb5dbc185ce13097b"
+          "size": 766
         },
         {
           "path": "paint_pad.app.rb",
-          "size": 1869,
-          "sha256": "ac86f4b830ab28398f1ee7467856ce3f1b4b09b6e47a43ebcdeb3bb60c578342"
+          "size": 1869
         }
       ]
     },
@@ -99,26 +93,23 @@
       "min_width": 400,
       "min_height": 200,
       "base": "apps/wide_only/",
+      "sha256": "8a3df05a8ee102cce81d9776a1e68045098c14b68178a006f59451e30d4e6480",
       "screenshot": {
         "path": "wide_only.png",
-        "size": 1460,
-        "sha256": "96f12c9ffbefd9ffea61ab5a6b2a09ef0a3474b3b7d26424f76f0d34eb982416"
+        "size": 1460
       },
       "thumb": {
         "path": "wide_only.thumb.bmp",
-        "size": 1846,
-        "sha256": "7e037bf44ce9a4beac803a62e354cf44d2f0792f83944af67636811f90b91485"
+        "size": 1846
       },
       "files": [
         {
           "path": "wide_only.app.toml",
-          "size": 603,
-          "sha256": "55c1af6c9fdc24e3dec73b4276de1a78de3f69dd484064bf8ece9a6a0385308e"
+          "size": 603
         },
         {
           "path": "wide_only.app.rb",
-          "size": 863,
-          "sha256": "f18a04cd8c9ee5ed3ad2f1d46f8b3c9154732e5740ad9b9b326ab4c47eca284b"
+          "size": 863
         }
       ]
     }
