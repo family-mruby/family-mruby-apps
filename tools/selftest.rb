@@ -62,14 +62,20 @@ module Selftest
       FileUtils.rm("#{d}/apps/paint_pad/paint_pad.png")
     }, "is missing"],
 
-    ["a screenshot of the whole desktop", ->(d) {
+    ["a capture of the whole desktop", ->(d) {
       FileUtils.cp("#{d}/apps/wide_only/wide_only.png",
                    "#{d}/apps/paint_pad/paint_pad.png")
-    }, "the whole screen"],
+    }, "exactly a screen"],
 
     ["a fullscreen app may fill the screen", ->(d) {
-      # wide_only is default_window_mode = "fullscreen", so its full-screen
-      # capture is the right one and must not be complained about.
+      # wide_only is default_window_mode = "fullscreen", so a picture the size
+      # of the screen is the right one and must not be complained about.
+    }, :no_error],
+
+    ["a picture that size on purpose is allowed", ->(d) {
+      FileUtils.cp("#{d}/apps/wide_only/wide_only.png",
+                   "#{d}/apps/paint_pad/paint_pad.png")
+      add("#{d}/apps/paint_pad/paint_pad.app.toml", "app_image_full_size = true")
     }, :no_error],
 
     ["regexp literal in the source", ->(d) {

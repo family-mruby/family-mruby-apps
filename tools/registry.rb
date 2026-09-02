@@ -27,12 +27,12 @@ module Registry
     dir = m[:dir]
     base = "apps/#{id}/"
 
-    shot = m["app_screenshot"] || "#{id}.png"
+    img = m["app_image"] || "#{id}.png"
     thumb = "#{id}.thumb.png"
-    GenThumb.generate(File.join(dir, shot), File.join(dir, thumb)) if generate_thumbs
+    GenThumb.generate(File.join(dir, img), File.join(dir, thumb)) if generate_thumbs
 
     # Files the installer writes to the device. The manifest and the script
-    # always; anything else only when the author listed it. The screenshot and
+    # always; anything else only when the author listed it. The picture and
     # the thumbnail are NOT here -- the store shows them, it does not install
     # them.
     names = []
@@ -68,7 +68,7 @@ module Registry
     # WHICH file differs would not help: a mismatch throws the install away
     # whole.
     e["sha256"] = app_digest(dir, names)
-    e["screenshot"] = file_entry(dir, shot)
+    e["image"] = file_entry(dir, img)
     e["thumb"]      = file_entry(dir, thumb)
     e["files"]      = names.map { |n| file_entry(dir, n) }
     e

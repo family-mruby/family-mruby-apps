@@ -65,22 +65,26 @@ So `<app_id>.app.toml` is required here, and `rake validate` says so. It also
 complains if you leave a fence in the `.rb` as well: the sidecar wins, and two
 copies of the same keys drift apart without anyone noticing.
 
-### Screenshot
+### Picture
 
-Commit a PNG of **your app's window**, not of the whole screen. The store
-shows it beside your app in a 32x24 box, and a picture of the desktop with
-your window somewhere in it shrinks to a picture of the desktop. `rake
-validate` refuses a screenshot that is exactly the size of a screen unless
-the app says `default_window_mode = "fullscreen"`, in which case the whole
-screen really is its window.
+Commit one PNG that shows what your app is: `<app_id>.png`. A capture of your
+app's **window** is the obvious choice, but it does not have to be one --
+drawn artwork or a title card is just as good, and often reads better small.
 
-`rake registry` produces the small one -- `<app_id>.thumb.png`, 32x24 -- from
+`rake registry` makes the small one -- `<app_id>.thumb.png`, 32x24 -- from
 what you committed. You never make that file yourself, but you do commit what
 the command produces.
 
-Two things survive being shrunk eight times and one does not: areas of colour
-and large shapes do, single-pixel lines mostly disappear. If your app draws
-thin lines, catch it in a state where there is something solid on screen.
+Two things to know, both about being shrunk eight times over:
+
+- **Areas of colour and large shapes survive; single-pixel lines mostly
+  disappear.** If your app draws thin lines, catch it when there is something
+  solid on screen, or draw something for it instead.
+- **A capture of the whole desktop becomes a picture of the wallpaper.**
+  `rake validate` stops a picture that is exactly the size of a screen,
+  because that is nearly always a capture that was never cropped. If yours is
+  that size on purpose -- the app runs fullscreen, or the artwork just is --
+  say `default_window_mode = "fullscreen"` or `app_image_full_size = true`.
 
 ### Memory
 

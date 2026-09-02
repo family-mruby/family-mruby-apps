@@ -153,28 +153,31 @@ module Validate
       end
     end
 
-    shot = m["app_screenshot"] || "#{m[:id_from_path]}.png"
-    path = File.join(m[:dir], shot)
+    img = m["app_image"] || "#{m[:id_from_path]}.png"
+    path = File.join(m[:dir], img)
     unless File.file?(path)
-      e << "#{rel}: #{shot} is missing (a screenshot is required, spec.md 10.2)"
+      e << "#{rel}: #{img} is missing (every app needs a picture, spec.md 10.2)"
       return e
     end
     unless File.binread(path, 8) == "\x89PNG\r\n\x1a\n".b
-      e << "#{rel}: #{shot} is not a PNG"
+      e << "#{rel}: #{img} is not a PNG"
       return e
     end
-    # A screenshot the size of the whole screen is a picture of the desktop,
-    # not of the app -- unless the app really does take the whole screen.
+    # A picture the exact size of a screen is usually a capture of the whole
+    # desktop with the app somewhere in it, which shrinks to a picture of the
+    # wallpaper. It is only usually, though: an app that runs fullscreen, or
+    # artwork that happens to be that size, are both fine and say so.
     w, h = png_size(path)
-    if w && FULL_SCREENS.include?([w, h]) && m["default_window_mode"] != "fullscreen"
-      e << "#{rel}: #{shot} is #{w}x#{h}, the whole screen. Crop it to the " \
-           "app's own window, or say default_window_mode = \"fullscreen\""
+    if w && FULL_SCREENS.include?([w, h]) &&
+       m["default_window_mode"] != "fullscreen" && m["app_image_full_size"] != true
+      e << "#{rel}: #{img} is #{w}x#{h}, exactly a screen. If it is a capture, " \
+           "crop it to the app's own window; if you meant it, say " \
+           "app_image_full_size = true"
     end
     e
   end
 
-  # The screens an app can be captured on. A windowed app's screenshot should
-  # never be exactly one of these.
+  # The screens something can be captured on.
   FULL_SCREENS = [[320, 240], [426, 240], [640, 360], [852, 480]].freeze
 
   # Straight out of the IHDR; there is no need to decode the image to learn

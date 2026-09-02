@@ -18,7 +18,7 @@
       ],
       "base": "apps/hello_store/",
       "sha256": "5128c9d96a0965192c6ef953d3b5840c5e377f18856028df72dfc7f0290a55db",
-      "screenshot": {
+      "image": {
         "path": "hello_store.png",
         "size": 801
       },
@@ -57,7 +57,7 @@
       "min_height": 240,
       "base": "apps/paint_pad/",
       "sha256": "987cf28eec5cc062bc36c242f34b41ab23b5e9e254b29c7fd993697138ee4a1c",
-      "screenshot": {
+      "image": {
         "path": "paint_pad.png",
         "size": 2241
       },
@@ -94,7 +94,7 @@
       "min_height": 200,
       "base": "apps/wide_only/",
       "sha256": "8a3df05a8ee102cce81d9776a1e68045098c14b68178a006f59451e30d4e6480",
-      "screenshot": {
+      "image": {
         "path": "wide_only.png",
         "size": 935
       },

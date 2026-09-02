@@ -1,5 +1,6 @@
-# Turn the author's screenshot PNG into the small one the store shows beside
-# each app in its list (spec.md 10.2).
+# Turn the author's picture into the small one the store shows beside each app
+# in its list (spec.md 10.2). It is usually a capture of the app's window, but
+# it does not have to be: whatever an author thinks represents their app.
 #
 # PNG, not BMP. The display side decodes PNG for create_image/draw_image,
 # which is how an app draws a picture into its own window; BMP is the sprite
