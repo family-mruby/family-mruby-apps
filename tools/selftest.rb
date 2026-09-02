@@ -62,6 +62,16 @@ module Selftest
       FileUtils.rm("#{d}/apps/paint_pad/paint_pad.png")
     }, "is missing"],
 
+    ["a screenshot of the whole desktop", ->(d) {
+      FileUtils.cp("#{d}/apps/wide_only/wide_only.png",
+                   "#{d}/apps/paint_pad/paint_pad.png")
+    }, "the whole screen"],
+
+    ["a fullscreen app may fill the screen", ->(d) {
+      # wide_only is default_window_mode = "fullscreen", so its full-screen
+      # capture is the right one and must not be complained about.
+    }, :no_error],
+
     ["regexp literal in the source", ->(d) {
       add("#{d}/apps/paint_pad/paint_pad.app.rb", 'PATTERN = /ab+c/')
     }, "Regexp does not exist"],

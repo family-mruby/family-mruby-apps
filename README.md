@@ -67,10 +67,20 @@ copies of the same keys drift apart without anyone noticing.
 
 ### Screenshot
 
-Commit a PNG of the app running, at the size of the screen you ran it on
-(320x240 on Retro, 426x240 on Modern and in the browser). `rake registry`
-shrinks it into the small BMP the device's store shows in its list; do not
-commit that file by hand, but do commit what the command produces.
+Commit a PNG of **your app's window**, not of the whole screen. The store
+shows it beside your app in a 32x24 box, and a picture of the desktop with
+your window somewhere in it shrinks to a picture of the desktop. `rake
+validate` refuses a screenshot that is exactly the size of a screen unless
+the app says `default_window_mode = "fullscreen"`, in which case the whole
+screen really is its window.
+
+`rake registry` produces the small one -- `<app_id>.thumb.png`, 32x24 -- from
+what you committed. You never make that file yourself, but you do commit what
+the command produces.
+
+Two things survive being shrunk eight times and one does not: areas of colour
+and large shapes do, single-pixel lines mostly disappear. If your app draws
+thin lines, catch it in a state where there is something solid on screen.
 
 ### Memory
 

@@ -155,12 +155,34 @@ module Validate
 
     shot = m["app_screenshot"] || "#{m[:id_from_path]}.png"
     path = File.join(m[:dir], shot)
-    if File.file?(path)
-      e << "#{rel}: #{shot} is not a PNG" unless File.binread(path, 8) == "\x89PNG\r\n\x1a\n".b
-    else
+    unless File.file?(path)
       e << "#{rel}: #{shot} is missing (a screenshot is required, spec.md 10.2)"
+      return e
+    end
+    unless File.binread(path, 8) == "\x89PNG\r\n\x1a\n".b
+      e << "#{rel}: #{shot} is not a PNG"
+      return e
+    end
+    # A screenshot the size of the whole screen is a picture of the desktop,
+    # not of the app -- unless the app really does take the whole screen.
+    w, h = png_size(path)
+    if w && FULL_SCREENS.include?([w, h]) && m["default_window_mode"] != "fullscreen"
+      e << "#{rel}: #{shot} is #{w}x#{h}, the whole screen. Crop it to the " \
+           "app's own window, or say default_window_mode = \"fullscreen\""
     end
     e
+  end
+
+  # The screens an app can be captured on. A windowed app's screenshot should
+  # never be exactly one of these.
+  FULL_SCREENS = [[320, 240], [426, 240], [640, 360], [852, 480]].freeze
+
+  # Straight out of the IHDR; there is no need to decode the image to learn
+  # how big it is.
+  def self.png_size(path)
+    head = File.binread(path, 24)
+    return [nil, nil] unless head && head.bytesize == 24
+    head[16, 8].unpack("NN")
   end
 
   def self.check_script(m, rel)
