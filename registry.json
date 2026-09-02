@@ -56,7 +56,7 @@
       "min_width": 320,
       "min_height": 240,
       "base": "apps/paint_pad/",
-      "sha256": "987cf28eec5cc062bc36c242f34b41ab23b5e9e254b29c7fd993697138ee4a1c",
+      "sha256": "46f5ef9602e79193d55d4083acefe1f43de78226d4a413d49267fc322e387c03",
       "image": {
         "path": "paint_pad.png",
         "size": 2241
@@ -68,7 +68,7 @@
       "files": [
         {
           "path": "paint_pad.app.toml",
-          "size": 766
+          "size": 1079
         },
         {
           "path": "paint_pad.app.rb",

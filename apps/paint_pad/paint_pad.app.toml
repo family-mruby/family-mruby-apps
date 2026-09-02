@@ -6,7 +6,11 @@ default_window_width = 260
 default_window_height = 170
 default_window_pos_x = 10
 default_window_pos_y = 30
-task_stack_kb = 32
+# No task_stack_kb: the default 16 KB is plenty for this, and asking for more
+# is not free. The stack comes out of internal RAM, which is the scarcest
+# thing on a board -- with both radios up, a NARYA v4 refused a 32 KB app
+# outright ("largest internal block 31744 < 40960 needed"). Ask only when
+# something actually overflows.
 
 # Keys the store reads. The device's TOML readers look keys up by name, so
 # these are ignored there (spec.md 3.1).

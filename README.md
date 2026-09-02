@@ -86,6 +86,15 @@ Two things to know, both about being shrunk eight times over:
   that size on purpose -- the app runs fullscreen, or the artwork just is --
   say `default_window_mode = "fullscreen"` or `app_image_full_size = true`.
 
+### Stack
+
+`task_stack_kb` raises the app's C stack above the default 16 KB. **Leave it
+out unless something actually overflows.** That stack is internal RAM, which
+is the scarcest thing on a board: with WiFi and BLE both up, a NARYA v4
+refused to start a 32 KB app at all -- *largest internal block 31744 < 40960
+needed* -- while the same app runs fine on the default. An app that asks for
+more than it needs is an app that will not start on a busy machine.
+
 ### Memory
 
 Leave it out unless you know you need it. An app that fits Retro's 500 KB pool

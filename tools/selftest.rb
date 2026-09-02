@@ -51,7 +51,7 @@ module Selftest
     }, "does not fit retro"],
 
     ["stack outside the device's range", ->(d) {
-      sub("#{d}/apps/paint_pad/paint_pad.app.toml", /^task_stack_kb = .*$/, "task_stack_kb = 128")
+      add("#{d}/apps/paint_pad/paint_pad.app.toml", "task_stack_kb = 128")
     }, "outside the device's 16..64 KB range"],
 
     ["app_files escaping the directory", ->(d) {
