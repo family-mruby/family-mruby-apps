@@ -45,24 +45,25 @@ app_license = "MIT"                  # optional, SPDX
 app_source = "https://..."           # optional
 ```
 
-### One file
+### Why a sidecar
 
-A small app can carry the same keys in a fenced comment at the top of the `.rb`
-and skip the `.app.toml` entirely. This is what the device's own launcher
-supports, so it is not a store-only shortcut.
+The device does let a `.rb` carry its keys in a fenced `#---fmrb` comment at
+the top, and that is fine for a script you launch yourself from the editor or
+the shell. **It is not enough for an app someone installs.**
 
-```ruby
-#---fmrb
-# app_screen_name = "Hello Store"
-# app_id = "hello_store"
-# app_version = "1.0.0"
-# ...
-#---
+The launcher builds its list by walking `.toml` files; it never opens a `.rb`
+looking for a fence. An app with only the inline form installs fine, runs fine
+if you launch it by path, and **never appears in the launcher** -- so nobody
+can find it. The firmware says as much when it sees one:
+
+```
+W: app_screen_name in the comment toml of hello_store.app.rb is ignored
+   (launcher metadata needs a .toml sidecar)
 ```
 
-The device reads only the **first 512 bytes** of the file looking for the
-fence, and the fence has to come before the first line that is not a comment.
-Keep the block short; if it does not fit, use a `.app.toml`.
+So `<app_id>.app.toml` is required here, and `rake validate` says so. It also
+complains if you leave a fence in the `.rb` as well: the sidecar wins, and two
+copies of the same keys drift apart without anyone noticing.
 
 ### Screenshot
 

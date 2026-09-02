@@ -168,6 +168,11 @@ module Validate
     path = m[:script_path]
     return e unless path && path.end_with?(".rb")
     src = File.read(path)
+    if src.byteslice(0, Manifest::INLINE_SCAN_BYTES).to_s.include?(Manifest::FENCE_OPEN)
+      e << "#{rel}: #{File.basename(path)} carries a #{Manifest::FENCE_OPEN} block. " \
+           "The sidecar wins, so the two can disagree without anyone noticing -- " \
+           "keep the keys in the .app.toml only"
+    end
     # Comments are where the traps get talked about rather than used.
     code = src.split("\n").reject { |l| l.strip.start_with?("#") }.join("\n")
     RUBY_TRAPS.each do |re, why|

@@ -30,15 +30,19 @@ module Manifest
     toml = File.join(dir, "#{base}.app.toml")
     script = SCRIPT_EXTS.map { |e| File.join(dir, "#{base}.app.#{e}") }.find { |p| File.file?(p) }
 
-    if File.file?(toml)
-      keys = parse(File.read(toml), toml)
-      toml_path = toml
-    elsif script
-      keys = parse(inline_body(script), script)
-      toml_path = nil
-    else
-      raise Error, "#{dir}: no #{base}.app.toml and no #{base}.app.<rb|lua|bas|py>"
+    unless File.file?(toml)
+      # The device does support a manifest in a fenced comment at the top of
+      # the .rb, and that is fine for a script you launch yourself. It is not
+      # enough for an app someone installs: the launcher's scan walks .toml
+      # files and never opens a .rb looking for a fence, so an app without a
+      # sidecar installs and is then invisible. The spawner refuses to take
+      # launcher metadata from a comment for the same reason (it says so:
+      # "launcher metadata needs a .toml sidecar"). Measured 2026-09-02.
+      raise Error, "#{dir}: no #{base}.app.toml -- a distributed app needs a " \
+                   "sidecar manifest, or it never shows up in the launcher"
     end
+    keys = parse(File.read(toml), toml)
+    toml_path = toml
 
     keys.merge(dir: dir, id_from_path: base, toml_path: toml_path, script_path: script)
   end

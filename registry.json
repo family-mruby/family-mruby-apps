@@ -7,8 +7,10 @@
       "name": "Hello Store",
       "name_ja": "こんにちは",
       "description": "The smallest app the store can carry",
+      "description_ja": "店が運べる一番小さなアプリ",
       "category": "demo",
       "author": "family-mruby",
+      "license": "MIT",
       "env": [
         "retro",
         "modern",
@@ -17,19 +19,24 @@
       "base": "apps/hello_store/",
       "screenshot": {
         "path": "hello_store.png",
-        "size": 1412,
-        "sha256": "6c3b0f343291660ec109eaf9358f8fd735fb6cbf8c1816eb5a430fea7214c41d"
+        "size": 5193,
+        "sha256": "1989f24deb372da092c784b4ec6d16b1e82bdb6d305b9aab4a3a281832b88853"
       },
       "thumb": {
         "path": "hello_store.thumb.bmp",
         "size": 1846,
-        "sha256": "57cd26909634238b870072b7994ae6297a32fd5c4a9da578c267817632b5dbe8"
+        "sha256": "06571f5cc0445234935a9c9a17bb8735c2da7d5442fbb6be1df0b2cc728f01e3"
       },
       "files": [
         {
+          "path": "hello_store.app.toml",
+          "size": 620,
+          "sha256": "531c207c612cea10a4cfed4a64b94ed5af2b3af89b43b4d64bf4ef719dbc9f26"
+        },
+        {
           "path": "hello_store.app.rb",
-          "size": 1211,
-          "sha256": "172944f7eb83b595479967991b93f45429d220be5d0e4e53793a09fa05af2072"
+          "size": 1344,
+          "sha256": "e11d18b28247ea9c45e93c430f869ffbaaa3bddebbc7a3c1c0c4e75dd2e3696b"
         }
       ]
     },
@@ -54,13 +61,13 @@
       "base": "apps/paint_pad/",
       "screenshot": {
         "path": "paint_pad.png",
-        "size": 1412,
-        "sha256": "6c3b0f343291660ec109eaf9358f8fd735fb6cbf8c1816eb5a430fea7214c41d"
+        "size": 4049,
+        "sha256": "8977366f990d14a9655060ca7056d53674e5f2a01c68af2cce853122b7600dae"
       },
       "thumb": {
         "path": "paint_pad.thumb.bmp",
         "size": 1846,
-        "sha256": "57cd26909634238b870072b7994ae6297a32fd5c4a9da578c267817632b5dbe8"
+        "sha256": "5e448de15fcdc9e068c97203332070f432f78e2e8c8d735db28307b4a6ec2415"
       },
       "files": [
         {
@@ -94,13 +101,13 @@
       "base": "apps/wide_only/",
       "screenshot": {
         "path": "wide_only.png",
-        "size": 1602,
-        "sha256": "ba867c71ac305e5fffb6af8e9116e92212637479a06bf187c4ccde2c7e1289fe"
+        "size": 1460,
+        "sha256": "96f12c9ffbefd9ffea61ab5a6b2a09ef0a3474b3b7d26424f76f0d34eb982416"
       },
       "thumb": {
         "path": "wide_only.thumb.bmp",
         "size": 1846,
-        "sha256": "057cc92d1027c0e43a27b185ed4c03b09d60099bde4b32bd28b4967e943236eb"
+        "sha256": "7e037bf44ce9a4beac803a62e354cf44d2f0792f83944af67636811f90b91485"
       },
       "files": [
         {

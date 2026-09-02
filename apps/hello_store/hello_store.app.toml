@@ -1,0 +1,16 @@
+# The smallest manifest a distributed app can have.
+#
+# Every window and memory key is left out on purpose: this specimen exists to
+# check that an app arriving from the store still gets the defaults. The file
+# itself cannot be left out -- see "Why a sidecar" in the README.
+app_screen_name = "Hello Store"
+app_screen_name_ja = "こんにちは"
+
+app_id = "hello_store"
+app_version = "1.0.0"
+app_author = "family-mruby"
+app_description = "The smallest app the store can carry"
+app_description_ja = "店が運べる一番小さなアプリ"
+app_category = "demo"
+app_env = ["retro", "modern", "web"]
+app_license = "MIT"

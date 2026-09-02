@@ -82,9 +82,14 @@ module Selftest
       sub("#{d}/apps/paint_pad/paint_pad.app.rb", /^\s*app\.start$/, "")
     }, "no .start call"],
 
-    ["inline fence that never closes", ->(d) {
-      sub("#{d}/apps/hello_store/hello_store.app.rb", /^#---$/, "# still going")
-    }, "does not close"],
+    ["no sidecar manifest", ->(d) {
+      FileUtils.rm("#{d}/apps/hello_store/hello_store.app.toml")
+    }, "needs a sidecar manifest"],
+
+    ["keys duplicated into a comment fence", ->(d) {
+      path = "#{d}/apps/hello_store/hello_store.app.rb"
+      File.write(path, "#---fmrb\n# app_id = \"hello_store\"\n#---\n" + File.read(path))
+    }, "keep the keys in the .app.toml only"],
 
     ["a table in the manifest", ->(d) {
       add("#{d}/apps/paint_pad/paint_pad.app.toml", "[extra]\nkey = 1")

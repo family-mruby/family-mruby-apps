@@ -1,18 +1,12 @@
-#---fmrb
-# app_screen_name = "Hello Store"
-# app_screen_name_ja = "こんにちは"
-# app_id = "hello_store"
-# app_version = "1.0.0"
-# app_author = "family-mruby"
-# app_category = "demo"
-# app_env = ["retro", "modern", "web"]
-# app_description = "The smallest app the store can carry"
-#---
+# Hello Store -- the smallest app the store can carry.
 #
-# One file, no sidecar .app.toml: the keys above ride in the fenced comment
-# block the spawner reads. Everything else (window size, memory, stack) is
-# left out on purpose -- this app is here to prove the defaults still apply
-# to an app that arrived from the store.
+# The manifest is the .app.toml next to this file, and it has to be: an app
+# whose keys live only in a fenced comment here is runnable by path but never
+# appears in the launcher, because the launcher walks .toml files and never
+# opens a .rb looking for a fence (measured 2026-09-02, report/p1b.md).
+#
+# No window, memory or stack keys anywhere, so this also checks that an app
+# arriving from the store still gets the defaults.
 
 class HelloStoreApp < FmrbApp
   def on_create
@@ -24,9 +18,12 @@ class HelloStoreApp < FmrbApp
     clear_user_area
     x = @user_area_x0 + 6
     y = @user_area_y0 + 6
-    @gfx.draw_text(x, y, "Hello from the store", theme_fg)
-    @gfx.draw_text(x, y + 12, "clicks: #{@n}", theme_fg)
-    @gfx.draw_text(x, y + 28, "Click anywhere.", theme_fg)
+    # The default window is 100x100 and the font is 6 px wide, so about 15
+    # characters fit on a line. An app that wants more has to ask for it in
+    # its .app.toml; this one is here to show what the defaults give you.
+    @gfx.draw_text(x, y, "Hello!", theme_fg)
+    @gfx.draw_text(x, y + 14, "clicks: #{@n}", theme_fg)
+    @gfx.draw_text(x, y + 32, "Click me.", theme_fg)
     draw_window_frame
     @gfx.present
   end
