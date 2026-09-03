@@ -120,18 +120,6 @@ ESP32-P4, and splitting lines costs nothing. The `.json` is there for people
 and for tools. Both come out of your `.app.toml` in the same pass, so they
 cannot disagree -- and that is why a tab or a newline in a field is rejected.
 
-## Things that pass on a PC and fail on the machine
-
-The device runs picoruby, not CRuby. `rake validate` catches these, but it is
-quicker to not write them:
-
-- **no `Regexp`** at all -- no literals, no `=~`, no `String#match`
-- **no `defined?`** -- use `const_defined?` or `rescue`
-- **no `Array#pack`**, **no `File.binread`**
-- an app that never calls `.start` does nothing when it is launched
-- blocks are expensive (about 0.4 ms a call); prefer `while` to `each` in a
-  hot loop
-
 ## Licence
 
 MIT, for this repository and everything in `apps/`. **Opening a pull request
