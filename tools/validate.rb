@@ -1,8 +1,14 @@
 # Checks every app in apps/ before it can go into the registry (spec.md 5.1).
 #
-# What is checked here is what the device cannot tell an author afterwards: a
-# missing key means an app that installs and then behaves oddly, and a Regexp
-# literal means an app that runs in a host test and dies on the machine.
+# Only the manifest is judged here -- the keys the registry is built from, and
+# whether the same keys are also duplicated in a fence inside the .rb. What the
+# app's Ruby does is not this tool's business: it used to grep for picoruby
+# traps (Regexp, defined?, Array#pack, File.binread) and for a .start call, and
+# both were dropped on 2026-09-03. An author reaches this repository having run
+# the app on a Family mruby, so those mistakes are already behind them; and the
+# checks could not be right anyway -- picoruby gains features, and an author who
+# has added a gem of their own would be told their working app is broken. A
+# check that will drift with the firmware is not worth maintaining here.
 
 require_relative "manifest"
 
@@ -23,23 +29,6 @@ module Validate
     GPL-2.0-only GPL-2.0-or-later GPL-3.0-only GPL-3.0-or-later
     LGPL-2.1-only LGPL-2.1-or-later LGPL-3.0-only LGPL-3.0-or-later
     MPL-2.0 AGPL-3.0-only AGPL-3.0-or-later
-  ].freeze
-
-  # Things that pass a host Ruby and fail on picoruby. The device has no
-  # Regexp at all, no defined?, no Array#pack and no File.binread.
-  RUBY_TRAPS = [
-    [/(?<![\w.])defined\?/,        "defined? does not exist in picoruby (use const_defined? or rescue)"],
-    [/\.pack\s*\(/,                "Array#pack does not exist in picoruby (build bytes with setbyte)"],
-    [/File\.binread/,              "File.binread does not exist in picoruby (File.open(path, \"r\") { |f| f.read })"],
-    [/=~|!~/,                      "Regexp does not exist in picoruby"],
-    [/(?<![\w.])Regexp(?![\w])/,   "Regexp does not exist in picoruby"],
-    # A regexp literal. The slash is also division, so only count one that
-    # sits where a value is expected (after =, (, [, comma, when, return) --
-    # `(w - dw) / 2` and `x / 16` follow an identifier or a bracket and are
-    # left alone.
-    [%r{(?:^|[=(\[,|&!]|\bwhen\b|\breturn\b)\s*/(?![\s=/])(?:[^/\\\n]|\\.)+/[imxo]*},
-     "Regexp does not exist in picoruby"],
-    [/\.(?:match\??|scan)\s*\(/,   "String#match / #scan need Regexp, which picoruby does not have"],
   ].freeze
 
   def self.run(root)
@@ -206,16 +195,6 @@ module Validate
       e << "#{rel}: #{File.basename(path)} carries a #{Manifest::FENCE_OPEN} block. " \
            "The sidecar wins, so the two can disagree without anyone noticing -- " \
            "keep the keys in the .app.toml only"
-    end
-    # Comments are where the traps get talked about rather than used.
-    code = src.split("\n").reject { |l| l.strip.start_with?("#") }.join("\n")
-    RUBY_TRAPS.each do |re, why|
-      next unless code =~ re
-      e << "#{rel}: #{File.basename(path)}: #{why}"
-    end
-    unless code =~ /\.start\b/
-      e << "#{rel}: #{File.basename(path)}: no .start call -- an app that is " \
-           "never started does nothing when it is launched"
     end
     e
   end

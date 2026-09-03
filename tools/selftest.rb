@@ -83,25 +83,11 @@ module Selftest
       add("#{d}/apps/paint_pad/paint_pad.app.toml", "app_image_full_size = true")
     }, :no_error],
 
-    ["regexp literal in the source", ->(d) {
+    # The source is not judged at all any more (validate.rb's header says why),
+    # so what the app's Ruby contains cannot fail validation.
+    ["a regexp in the source is not validation's business", ->(d) {
       add("#{d}/apps/paint_pad/paint_pad.app.rb", 'PATTERN = /ab+c/')
-    }, "Regexp does not exist"],
-
-    ["=~ in the source", ->(d) {
-      add("#{d}/apps/paint_pad/paint_pad.app.rb", 'HIT = ("a" =~ B)')
-    }, "Regexp does not exist"],
-
-    ["division is not mistaken for a regexp", ->(d) {
-      add("#{d}/apps/paint_pad/paint_pad.app.rb", "MID = (100 - 4) / 2\nSTEP = 640 / 16")
     }, :no_error],
-
-    ["defined? in the source", ->(d) {
-      add("#{d}/apps/paint_pad/paint_pad.app.rb", 'X = defined?(Foo)')
-    }, "defined? does not exist"],
-
-    ["no .start call", ->(d) {
-      sub("#{d}/apps/paint_pad/paint_pad.app.rb", /^\s*app\.start$/, "")
-    }, "no .start call"],
 
     ["no sidecar manifest", ->(d) {
       FileUtils.rm("#{d}/apps/hello_store/hello_store.app.toml")
