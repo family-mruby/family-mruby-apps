@@ -15,7 +15,7 @@ require_relative "manifest"
 module Validate
   REQUIRED = %w[app_id app_version app_author app_description app_category app_env].freeze
 
-  CATEGORIES = %w[game tool education demo media presentation iot robotics development other].freeze
+  CATEGORIES = %w[game tool education demo media presentation iot robotics development stamp other].freeze
   ENVS       = %w[retro modern web].freeze
 
   # The screen each environment actually gives an app. Physical output is
@@ -100,6 +100,104 @@ module Validate
     e.concat(check_heap(m, rel))
     e.concat(check_files(m, rel, root))
     e.concat(check_script(m, rel))
+    e.concat(check_stamp_pack(m, rel, envs))
+    e.concat(check_install_paths(m, rel))
+    e
+  end
+
+  # ---- stamp packs ----------------------------------------------------------
+  #
+  # A stamp pack is pictures and no program: the chat app on Modern and in the
+  # browser offers every *.png of an installed pack (but the pack's own
+  # <id>.png, the store's picture) as a stamp. The device recognises one by
+  # stamp_pack = true in its .app.toml; with no script beside it, the launcher
+  # does not list it either.
+
+  # What the chat app takes as a stamp: 48x48 at most and 8 KB at most.
+  STAMP_MAX_PX = 48
+  STAMP_MAX_BYTES = 8192
+  # Plain names: they become file names on a littlefs volume and are sorted
+  # into the order the chat shows them in.
+  STAMP_NAME = /\A[a-z0-9_]{1,40}\.png\z/
+
+  # The colour types and bit depths the device's PNG reader decodes, and
+  # nothing interlaced.
+  PNG_FORMATS = { 0 => [1, 2, 4, 8], 2 => [8], 3 => [1, 2, 4, 8], 4 => [8], 6 => [8] }.freeze
+
+  def self.check_stamp_pack(m, rel, envs)
+    e = []
+    pack = m["stamp_pack"]
+    return e if pack.nil?
+    unless pack == true || pack == false
+      e << "#{rel}: stamp_pack must be true or false"
+      return e
+    end
+    if pack == false
+      e << "#{rel}: app_category \"stamp\" is for stamp packs (stamp_pack = true)" if m["app_category"] == "stamp"
+      return e
+    end
+
+    e << "#{rel}: a stamp pack takes app_category = \"stamp\"" if m["app_category"] != "stamp"
+    if m[:script_path]
+      e << "#{rel}: a stamp pack is pictures only -- #{File.basename(m[:script_path])} " \
+           "would make the launcher list it as an app"
+    end
+    if envs && envs.include?("retro")
+      e << "#{rel}: a stamp pack cannot list retro in app_env (the chat app runs on " \
+           "modern and web only)"
+    end
+    # The chat skips <id>.png by that name; a picture under any other name
+    # would be offered as a stamp.
+    if m["app_image"] && m["app_image"] != "#{m[:id_from_path]}.png"
+      e << "#{rel}: a stamp pack's picture for the store must be #{m[:id_from_path]}.png"
+    end
+
+    stamps = Manifest.stamp_files(m)
+    e << "#{rel}: a stamp pack needs at least one stamp (*.png besides #{m[:id_from_path]}.png)" if stamps.empty?
+    stamps.each do |n|
+      path = File.join(m[:dir], n)
+      e << "#{rel}: #{n}: a stamp's name must be [a-z0-9_] and end in .png" unless n =~ STAMP_NAME
+      size = File.size(path)
+      e << "#{rel}: #{n} is #{size} bytes; a stamp can be #{STAMP_MAX_BYTES} at most" if size > STAMP_MAX_BYTES
+      head = File.binread(path, 29).to_s
+      unless head.byteslice(0, 8) == "\x89PNG\r\n\x1a\n".b && head.byteslice(12, 4) == "IHDR"
+        e << "#{rel}: #{n} is not a PNG"
+        next
+      end
+      w, h, depth, ctype, _c, _f, interlace = head.byteslice(16, 13).unpack("NNC5")
+      if w > STAMP_MAX_PX || h > STAMP_MAX_PX
+        e << "#{rel}: #{n} is #{w}x#{h}; a stamp can be #{STAMP_MAX_PX}x#{STAMP_MAX_PX} at most"
+      end
+      unless PNG_FORMATS.fetch(ctype, []).include?(depth) && interlace == 0
+        e << "#{rel}: #{n}: colour type #{ctype}, #{depth} bits#{interlace == 0 ? '' : ', interlaced'} " \
+             "is not a PNG the device reads (use 8-bit RGB, RGBA or a palette, not interlaced)"
+      end
+    end
+    e
+  end
+
+  # The installer writes each file to /app/usr/<id>/<name>. The board's littlefs
+  # is built for names of up to 63 bytes; holding the whole path to that keeps
+  # every file well inside it whatever the volume counts.
+  PATH_MAX_BYTES = 63
+
+  def self.check_install_paths(m, rel)
+    e = []
+    id = m["app_id"]
+    return e unless id
+    names = []
+    names << File.basename(m[:toml_path]) if m[:toml_path]
+    names << File.basename(m[:script_path]) if m[:script_path]
+    names.concat(Array(m["app_files"])) if m["app_files"].is_a?(Array)
+    names.concat(Manifest.stamp_files(m)) if m["stamp_pack"] == true
+    names.uniq.each do |n|
+      path = "/app/usr/#{id}/#{n}"
+      if path.bytesize > PATH_MAX_BYTES
+        e << "#{rel}: #{n}: #{path} is #{path.bytesize} bytes on the device; " \
+             "#{PATH_MAX_BYTES} is the most it can hold"
+      end
+      e << "#{rel}: #{n}: a file name cannot hold a tab or a newline" if n.include?("\t") || n.include?("\n")
+    end
     e
   end
 
@@ -133,7 +231,9 @@ module Validate
 
   def self.check_files(m, rel, root)
     e = []
-    e << "#{rel}: no #{m[:id_from_path]}.app.<rb|lua|bas|py> next to the manifest" unless m[:script_path]
+    unless m[:script_path] || m["stamp_pack"] == true
+      e << "#{rel}: no #{m[:id_from_path]}.app.<rb|lua|bas|py> next to the manifest"
+    end
 
     listed = m["app_files"]
     if listed

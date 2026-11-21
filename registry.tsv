@@ -5,6 +5,23 @@ F	hello_store.app.rb	1344
 A	paint_pad	1.0.0	Paint Pad	おえかき	Draw with the mouse, clear with the right button	マウスで描いて、右ボタンで消す	tool	family-mruby	retro,modern,web	320	240			46f5ef9602e79193d55d4083acefe1f43de78226d4a413d49267fc322e387c03	apps/paint_pad/	paint_pad.thumb.png	818
 F	paint_pad.app.toml	1079
 F	paint_pad.app.rb	1869
+A	stamps_basic	1.0.0	Basic	きほん	15 stamps for the chat: faces, heart, star, OK and more	チャットのスタンプ 15 枚: 顔・ハート・星・まる・ばつ など	stamp	family-mruby	modern,web					99282bc323e6ccc12e1df238e1efde76d8a88b2f99a248e2349103a9bbbf2ebe	apps/stamps_basic/	stamps_basic.thumb.png	961
+F	stamps_basic.app.toml	929
+F	01_smile.png	292
+F	02_laugh.png	315
+F	03_cry.png	303
+F	04_angry.png	288
+F	05_surprised.png	290
+F	06_sweat.png	324
+F	07_heart.png	269
+F	08_star.png	265
+F	09_ok.png	298
+F	10_no.png	254
+F	11_question.png	265
+F	12_exclaim.png	201
+F	13_thanks.png	278
+F	14_good_night.png	282
+F	15_thumbs_up.png	239
 A	wide_only	1.0.0	Wide Only	よこながだけ	Needs a screen wider than Retro has	Retro より広い画面が要る	demo	family-mruby	modern,web	400	200			8a3df05a8ee102cce81d9776a1e68045098c14b68178a006f59451e30d4e6480	apps/wide_only/	wide_only.thumb.png	171
 F	wide_only.app.toml	603
 F	wide_only.app.rb	863

@@ -77,6 +77,97 @@
       ]
     },
     {
+      "id": "stamps_basic",
+      "version": "1.0.0",
+      "name": "Basic",
+      "name_ja": "きほん",
+      "description": "15 stamps for the chat: faces, heart, star, OK and more",
+      "description_ja": "チャットのスタンプ 15 枚: 顔・ハート・星・まる・ばつ など",
+      "category": "stamp",
+      "author": "family-mruby",
+      "license": "MIT",
+      "env": [
+        "modern",
+        "web"
+      ],
+      "base": "apps/stamps_basic/",
+      "sha256": "99282bc323e6ccc12e1df238e1efde76d8a88b2f99a248e2349103a9bbbf2ebe",
+      "image": {
+        "path": "stamps_basic.png",
+        "size": 1230
+      },
+      "thumb": {
+        "path": "stamps_basic.thumb.png",
+        "size": 961
+      },
+      "files": [
+        {
+          "path": "stamps_basic.app.toml",
+          "size": 929
+        },
+        {
+          "path": "01_smile.png",
+          "size": 292
+        },
+        {
+          "path": "02_laugh.png",
+          "size": 315
+        },
+        {
+          "path": "03_cry.png",
+          "size": 303
+        },
+        {
+          "path": "04_angry.png",
+          "size": 288
+        },
+        {
+          "path": "05_surprised.png",
+          "size": 290
+        },
+        {
+          "path": "06_sweat.png",
+          "size": 324
+        },
+        {
+          "path": "07_heart.png",
+          "size": 269
+        },
+        {
+          "path": "08_star.png",
+          "size": 265
+        },
+        {
+          "path": "09_ok.png",
+          "size": 298
+        },
+        {
+          "path": "10_no.png",
+          "size": 254
+        },
+        {
+          "path": "11_question.png",
+          "size": 265
+        },
+        {
+          "path": "12_exclaim.png",
+          "size": 201
+        },
+        {
+          "path": "13_thanks.png",
+          "size": 278
+        },
+        {
+          "path": "14_good_night.png",
+          "size": 282
+        },
+        {
+          "path": "15_thumbs_up.png",
+          "size": 239
+        }
+      ]
+    },
+    {
       "id": "wide_only",
       "version": "1.0.0",
       "name": "Wide Only",

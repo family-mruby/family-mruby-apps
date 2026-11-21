@@ -35,8 +35,8 @@ app_version = "1.0.0"
 app_author = "your name"
 app_description = "Draw with the mouse"
 app_description_ja = "マウスで描く"
-app_category = "tool"                # game tool education demo media
-                                     # presentation iot robotics development other
+app_category = "tool"                # game tool education demo media presentation
+                                     # iot robotics development stamp other
 app_env = ["retro", "modern", "web"] # where you have actually run it
 app_min_width = 320                  # optional
 app_min_height = 240
@@ -103,6 +103,59 @@ fits everywhere else, and that is nearly every app.
 required_heap_kb_esp32 = 700    # Retro / Modern
 required_heap_kb_linux = 1400   # the Linux simulator and the browser
 ```
+
+## Stamp packs
+
+A stamp pack is pictures for the chat app, and no program. The chat app on
+Modern and in the browser offers the pictures of every installed pack as
+stamps, a tab per pack. Stamps are not part of the firmware image; this is
+where they come from.
+
+```
+apps/stamps_basic/
+├─ stamps_basic.app.toml   the manifest, with stamp_pack = true
+├─ stamps_basic.png        the picture the store shows (not a stamp)
+├─ 01_smile.png            the stamps, in the order of their names
+├─ 02_laugh.png
+└─ ...
+```
+
+```toml
+app_screen_name = "Basic"            # the tab's name in the chat
+app_screen_name_ja = "きほん"
+stamp_pack = true
+
+app_id = "stamps_basic"
+app_version = "1.0.0"
+app_author = "your name"
+app_description = "15 stamps for the chat: faces, heart, star, OK and more"
+app_category = "stamp"
+app_env = ["modern", "web"]          # the chat does not run on Retro
+app_license = "MIT"
+```
+
+Every `*.png` in the directory but `<app_id>.png` is a stamp, and goes to the
+device with the manifest. There is no script: with none, the launcher does not
+list the pack as an app. `rake validate` holds each stamp to what the chat
+accepts:
+
+- **48x48 at most and 8 KB at most.** 32x32 is a good size: the chat shows a
+  stamp in a 32 px square, doubling 16x16 and leaving 24 and 32 as they are.
+- **A PNG the device decodes**: 8-bit RGB or RGBA, or a palette (1 to 8
+  bits), not interlaced.
+- **Names of `[a-z0-9_]` ending in `.png`**, which keeps them inside the
+  file-name length of the board's file system. A number in front (`01_`,
+  `02_`) sets the order.
+
+**Transparency.** The screen has 256 colours (RGB332) and one of them, `0x01`
+-- RGB(0, 0, 85) -- is drawn as see-through. A pixel whose alpha is below 128
+reads as that colour, and so does a palette entry that `tRNS` makes
+transparent. Draw with a transparent background and keep in mind that a
+colour is cut to its top 3-3-2 bits on the device, so pick colours that
+survive it.
+
+The pictures of `stamps_basic` were drawn for this repository and are under
+its licence (below), like everything else in `apps/`.
 
 ## Submitting
 

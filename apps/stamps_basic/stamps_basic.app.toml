@@ -1,0 +1,22 @@
+# A stamp pack: pictures for the chat app, and no program.
+#
+# stamp_pack = true is what the chat app looks for in /app/usr/<id>/. Every
+# *.png here but stamps_basic.png (the picture the store shows) is offered as
+# a stamp, in the order of their names. With no script beside this file, the
+# launcher does not list the pack.
+#
+# The pictures were drawn for this repository (32x32, RGB332 colours, the
+# transparent pixels are the system's transparent colour) and are under its
+# MIT licence like everything else in apps/.
+app_screen_name = "Basic"
+app_screen_name_ja = "きほん"
+stamp_pack = true
+
+app_id = "stamps_basic"
+app_version = "1.0.0"
+app_author = "family-mruby"
+app_description = "15 stamps for the chat: faces, heart, star, OK and more"
+app_description_ja = "チャットのスタンプ 15 枚: 顔・ハート・星・まる・ばつ など"
+app_category = "stamp"
+app_env = ["modern", "web"]
+app_license = "MIT"

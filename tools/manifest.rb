@@ -47,6 +47,17 @@ module Manifest
     keys.merge(dir: dir, id_from_path: base, toml_path: toml_path, script_path: script)
   end
 
+  # A stamp pack's pictures: every *.png in its directory but the store's
+  # picture (<id>.png) and the thumbnail made from it, by name. The chat app
+  # on the device picks them out the same way (any name ending in .png, in
+  # any case), so this is exactly what it will offer.
+  def self.stamp_files(m)
+    id = m[:id_from_path]
+    Dir.children(m[:dir]).select { |n| n.downcase.end_with?(".png") && File.file?(File.join(m[:dir], n)) }
+       .reject { |n| n == "#{id}.png" || n == "#{id}.thumb.png" }
+       .sort
+  end
+
   # The fenced comment block at the top of a .rb, with the leading "# "
   # stripped, exactly as the device assembles it before handing it to its TOML
   # parser. Raises when the fence is not there or does not close.

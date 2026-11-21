@@ -10,6 +10,7 @@
 
 require "fileutils"
 require "tmpdir"
+require "zlib"
 require_relative "validate"
 
 module Selftest
@@ -97,6 +98,72 @@ module Selftest
       path = "#{d}/apps/hello_store/hello_store.app.rb"
       File.write(path, "#---fmrb\n# app_id = \"hello_store\"\n#---\n" + File.read(path))
     }, "keep the keys in the .app.toml only"],
+
+    # ---- stamp packs ----
+
+    ["a stamp pack needs no script", ->(d) {
+      # stamps_basic as committed has none; nothing may complain about that.
+    }, :no_error],
+
+    ["a stamp pack with a script", ->(d) {
+      FileUtils.cp("#{d}/apps/hello_store/hello_store.app.rb", "#{d}/apps/stamps_basic/stamps_basic.app.rb")
+    }, "is pictures only"],
+
+    ["a stamp pack without stamps", ->(d) {
+      Dir.glob("#{d}/apps/stamps_basic/*.png").each { |f| FileUtils.rm(f) unless File.basename(f) == "stamps_basic.png" }
+    }, "needs at least one stamp"],
+
+    ["a stamp pack for retro", ->(d) {
+      sub("#{d}/apps/stamps_basic/stamps_basic.app.toml", /^app_env = .*$/, 'app_env = ["retro", "modern", "web"]')
+    }, "cannot list retro"],
+
+    ["a stamp pack in another category", ->(d) {
+      sub("#{d}/apps/stamps_basic/stamps_basic.app.toml", /^app_category = .*$/, 'app_category = "media"')
+    }, "takes app_category = \"stamp\""],
+
+    ["the stamp category for an app", ->(d) {
+      sub("#{d}/apps/paint_pad/paint_pad.app.toml", /^app_category = .*$/, 'app_category = "stamp"')
+      add("#{d}/apps/paint_pad/paint_pad.app.toml", "stamp_pack = false")
+    }, "is for stamp packs"],
+
+    ["a stamp too large", ->(d) {
+      # paint_pad's picture is 262x172 and far over 8 KB
+      FileUtils.cp("#{d}/apps/paint_pad/paint_pad.png", "#{d}/apps/stamps_basic/99_big.png")
+    }, "48x48 at most"],
+
+    ["a stamp too heavy", ->(d) {
+      # 48x48 is allowed, but RGBA noise does not compress: about 9 KB
+      rnd = Random.new(1)
+      raw = (0...48).map { "\x00".b + rnd.bytes(48 * 4) }.join
+      chunk = ->(t, data) { [data.bytesize].pack("N") + t + data + [Zlib.crc32(t + data)].pack("N") }
+      File.binwrite("#{d}/apps/stamps_basic/99_noise.png",
+                    "\x89PNG\r\n\x1a\n".b + chunk.("IHDR", [48, 48, 8, 6, 0, 0, 0].pack("NNC5")) +
+                    chunk.("IDAT", Zlib::Deflate.deflate(raw)) + chunk.("IEND", ""))
+    }, "8192 at most"],
+
+    ["a stamp that is not a PNG", ->(d) {
+      File.write("#{d}/apps/stamps_basic/99_text.png", "not a picture")
+    }, "99_text.png is not a PNG"],
+
+    ["a stamp the device cannot decode", ->(d) {
+      png = File.binread("#{d}/apps/stamps_basic/01_smile.png")
+      png.setbyte(28, 1)   # IHDR interlace method: Adam7
+      File.binwrite("#{d}/apps/stamps_basic/01_smile.png", png)
+    }, "interlaced"],
+
+    ["a stamp with an awkward name", ->(d) {
+      FileUtils.cp("#{d}/apps/stamps_basic/01_smile.png", "#{d}/apps/stamps_basic/Smile Face.PNG")
+    }, "a stamp's name must be"],
+
+    ["a file name too long for the device", ->(d) {
+      long = "#{'a' * 44}.txt"
+      File.write("#{d}/apps/paint_pad/#{long}", "x")
+      add("#{d}/apps/paint_pad/paint_pad.app.toml", %(app_files = ["#{long}"]))
+    }, "the most it can hold"],
+
+    ["a stamp pack whose store picture has another name", ->(d) {
+      add("#{d}/apps/stamps_basic/stamps_basic.app.toml", 'app_image = "01_smile.png"')
+    }, "must be stamps_basic.png"],
 
     ["a table in the manifest", ->(d) {
       add("#{d}/apps/paint_pad/paint_pad.app.toml", "[extra]\nkey = 1")

@@ -34,11 +34,12 @@ module Registry
     # Files the installer writes to the device. The manifest and the script
     # always; anything else only when the author listed it. The picture and
     # the thumbnail are NOT here -- the store shows them, it does not install
-    # them.
+    # them. A stamp pack has no script, and its stamps go in as its files.
     names = []
     names << File.basename(m[:toml_path]) if m[:toml_path]
-    names << File.basename(m[:script_path])
+    names << File.basename(m[:script_path]) if m[:script_path]
     names.concat(Array(m["app_files"]))
+    names.concat(Manifest.stamp_files(m)) if m["stamp_pack"] == true
     names.uniq!
 
     e = {}
