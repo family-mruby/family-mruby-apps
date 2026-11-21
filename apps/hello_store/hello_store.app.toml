@@ -7,7 +7,7 @@ app_screen_name = "Hello Store"
 app_screen_name_ja = "こんにちは"
 
 app_id = "hello_store"
-app_version = "1.0.0"
+app_version = "1.1.0"
 app_author = "family-mruby"
 app_description = "The smallest app the store can carry"
 app_description_ja = "店が運べる一番小さなアプリ"

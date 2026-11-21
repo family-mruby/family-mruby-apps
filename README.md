@@ -44,21 +44,51 @@ app_license = "MIT"                  # optional, SPDX
 app_source = "https://..."           # optional
 ```
 
+The app itself only defines a class. Once the file has been read, the firmware
+makes the one `FmrbApp` subclass in it and starts it, so there is no
+`MyApp.new.start` at the end (with two subclasses in one file, name the one
+to start with `class = "MyApp"` in the manifest). Coordinates are relative to
+the area inside the window's frame, and the frame is the firmware's to draw:
+
+```ruby
+class HelloApp < FmrbApp
+  def on_create
+    @n = 0
+    draw_screen
+  end
+
+  def draw_screen
+    clear_user_area                      # the theme's paper colour
+    @gfx.draw_text(6, 6, "clicks: #{@n}", theme_fg)
+    @gfx.present
+  end
+
+  def on_event(ev)                       # moving and closing are already done
+    return unless ev[:type] == :mouse_up && ev[:button] == 1
+    @n += 1
+    draw_screen
+  end
+
+  def on_update
+    100                                  # ms until the next call
+  end
+end
+```
+
+`apps/hello_store`, `apps/paint_pad` and `apps/wide_only` are complete
+examples of this shape.
+
 ### Why a sidecar
 
 The device does let a `.rb` carry its keys in a fenced `#---fmrb` comment at
 the top, and that is fine for a script you launch yourself from the editor or
 the shell. **It is not enough for an app someone installs.**
 
-The launcher builds its list by walking `.toml` files; it never opens a `.rb`
-looking for a fence. An app with only the inline form installs fine, runs fine
-if you launch it by path, and **never appears in the launcher** -- so nobody
-can find it. The firmware says as much when it sees one:
-
-```
-W: app_screen_name in the comment toml of hello_store.app.rb is ignored
-   (launcher metadata needs a .toml sidecar)
-```
+The installed `<app_id>.app.toml` is the store's record of the install: the
+store on the device reads `app_version` from it to tell whether an app is
+installed and whether the list has a newer one, and removing an app is
+removing that directory. An app whose keys live only in a fence would install
+and then look as if it never had.
 
 So `<app_id>.app.toml` is required here, and `rake validate` says so. It also
 complains if you leave a fence in the `.rb` as well: the sidecar wins, and two

@@ -1,10 +1,10 @@
 1
-A	hello_store	1.0.0	Hello Store	こんにちは	The smallest app the store can carry	店が運べる一番小さなアプリ	demo	family-mruby	retro,modern,web					5128c9d96a0965192c6ef953d3b5840c5e377f18856028df72dfc7f0290a55db	apps/hello_store/	hello_store.thumb.png	460
+A	hello_store	1.1.0	Hello Store	こんにちは	The smallest app the store can carry	店が運べる一番小さなアプリ	demo	family-mruby	retro,modern,web					714b35fa8e4e3610f4e8aa9a5ce1bce691ef7df47856e2da5e76fbc2c15151c8	apps/hello_store/	hello_store.thumb.png	460
 F	hello_store.app.toml	620
-F	hello_store.app.rb	1344
-A	paint_pad	1.0.0	Paint Pad	おえかき	Draw with the mouse, clear with the right button	マウスで描いて、右ボタンで消す	tool	family-mruby	retro,modern,web	320	240			46f5ef9602e79193d55d4083acefe1f43de78226d4a413d49267fc322e387c03	apps/paint_pad/	paint_pad.thumb.png	818
+F	hello_store.app.rb	1230
+A	paint_pad	1.1.0	Paint Pad	おえかき	Draw with the mouse, clear with the right button	マウスで描いて、右ボタンで消す	tool	family-mruby	retro,modern,web	320	240			e342e4a7ee95989d45cb4dbec80ae101542d304153c159ef3bd66b8572baf2e5	apps/paint_pad/	paint_pad.thumb.png	818
 F	paint_pad.app.toml	1079
-F	paint_pad.app.rb	1869
+F	paint_pad.app.rb	2111
 A	stamps_basic	1.0.0	Basic	きほん	15 stamps for the chat: faces, heart, star, OK and more	チャットのスタンプ 15 枚: 顔・ハート・星・まる・ばつ など	stamp	family-mruby	modern,web					99282bc323e6ccc12e1df238e1efde76d8a88b2f99a248e2349103a9bbbf2ebe	apps/stamps_basic/	stamps_basic.thumb.png	961
 F	stamps_basic.app.toml	929
 F	01_smile.png	292
@@ -22,6 +22,6 @@ F	12_exclaim.png	201
 F	13_thanks.png	278
 F	14_good_night.png	282
 F	15_thumbs_up.png	239
-A	wide_only	1.0.0	Wide Only	よこながだけ	Needs a screen wider than Retro has	Retro より広い画面が要る	demo	family-mruby	modern,web	400	200			8a3df05a8ee102cce81d9776a1e68045098c14b68178a006f59451e30d4e6480	apps/wide_only/	wide_only.thumb.png	171
+A	wide_only	1.1.0	Wide Only	よこながだけ	Needs a screen wider than Retro has	Retro より広い画面が要る	demo	family-mruby	modern,web	400	200			63117368b0b3f943f4e2ddbda2ab9f55939dc4ea6319c23d8d38d91ddf5aaeee	apps/wide_only/	wide_only.thumb.png	171
 F	wide_only.app.toml	603
-F	wide_only.app.rb	863
+F	wide_only.app.rb	1137

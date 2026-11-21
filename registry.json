@@ -3,7 +3,7 @@
   "apps": [
     {
       "id": "hello_store",
-      "version": "1.0.0",
+      "version": "1.1.0",
       "name": "Hello Store",
       "name_ja": "こんにちは",
       "description": "The smallest app the store can carry",
@@ -17,7 +17,7 @@
         "web"
       ],
       "base": "apps/hello_store/",
-      "sha256": "5128c9d96a0965192c6ef953d3b5840c5e377f18856028df72dfc7f0290a55db",
+      "sha256": "714b35fa8e4e3610f4e8aa9a5ce1bce691ef7df47856e2da5e76fbc2c15151c8",
       "image": {
         "path": "hello_store.png",
         "size": 801
@@ -33,13 +33,13 @@
         },
         {
           "path": "hello_store.app.rb",
-          "size": 1344
+          "size": 1230
         }
       ]
     },
     {
       "id": "paint_pad",
-      "version": "1.0.0",
+      "version": "1.1.0",
       "name": "Paint Pad",
       "name_ja": "おえかき",
       "description": "Draw with the mouse, clear with the right button",
@@ -56,7 +56,7 @@
       "min_width": 320,
       "min_height": 240,
       "base": "apps/paint_pad/",
-      "sha256": "46f5ef9602e79193d55d4083acefe1f43de78226d4a413d49267fc322e387c03",
+      "sha256": "e342e4a7ee95989d45cb4dbec80ae101542d304153c159ef3bd66b8572baf2e5",
       "image": {
         "path": "paint_pad.png",
         "size": 2241
@@ -72,7 +72,7 @@
         },
         {
           "path": "paint_pad.app.rb",
-          "size": 1869
+          "size": 2111
         }
       ]
     },
@@ -169,7 +169,7 @@
     },
     {
       "id": "wide_only",
-      "version": "1.0.0",
+      "version": "1.1.0",
       "name": "Wide Only",
       "name_ja": "よこながだけ",
       "description": "Needs a screen wider than Retro has",
@@ -184,7 +184,7 @@
       "min_width": 400,
       "min_height": 200,
       "base": "apps/wide_only/",
-      "sha256": "8a3df05a8ee102cce81d9776a1e68045098c14b68178a006f59451e30d4e6480",
+      "sha256": "63117368b0b3f943f4e2ddbda2ab9f55939dc4ea6319c23d8d38d91ddf5aaeee",
       "image": {
         "path": "wide_only.png",
         "size": 935
@@ -200,7 +200,7 @@
         },
         {
           "path": "wide_only.app.rb",
-          "size": 863
+          "size": 1137
         }
       ]
     }

@@ -1,12 +1,11 @@
 # Hello Store -- the smallest app the store can carry.
 #
-# The manifest is the .app.toml next to this file, and it has to be: an app
-# whose keys live only in a fenced comment here is runnable by path but never
-# appears in the launcher, because the launcher walks .toml files and never
-# opens a .rb looking for a fence (measured 2026-09-02, report/p1b.md).
+# The file only defines the class. Once it has been read, the firmware makes
+# the one FmrbApp subclass it defines and starts it, so there is no
+# `HelloStoreApp.new.start` at the end.
 #
-# No window, memory or stack keys anywhere, so this also checks that an app
-# arriving from the store still gets the defaults.
+# No window, memory or stack keys in the .app.toml, so this also checks that
+# an app arriving from the store still gets the defaults.
 
 class HelloStoreApp < FmrbApp
   def on_create
@@ -14,22 +13,21 @@ class HelloStoreApp < FmrbApp
     draw_screen
   end
 
+  # (0, 0) is the top left of the area inside the frame. The frame itself is
+  # the firmware's to draw.
   def draw_screen
     clear_user_area
-    x = @user_area_x0 + 6
-    y = @user_area_y0 + 6
     # The default window is 100x100 and the font is 6 px wide, so about 15
     # characters fit on a line. An app that wants more has to ask for it in
     # its .app.toml; this one is here to show what the defaults give you.
-    @gfx.draw_text(x, y, "Hello!", theme_fg)
-    @gfx.draw_text(x, y + 14, "clicks: #{@n}", theme_fg)
-    @gfx.draw_text(x, y + 32, "Click me.", theme_fg)
-    draw_window_frame
+    @gfx.draw_text(6, 6, "Hello!", theme_fg)
+    @gfx.draw_text(6, 20, "clicks: #{@n}", theme_fg)
+    @gfx.draw_text(6, 38, "Click me.", theme_border)
     @gfx.present
   end
 
+  # Moving and closing the window have been dealt with before this is called.
   def on_event(ev)
-    super(ev)
     return unless ev[:type] == :mouse_up && ev[:button] == 1
     @n += 1
     draw_screen
@@ -38,11 +36,4 @@ class HelloStoreApp < FmrbApp
   def on_update
     100
   end
-end
-
-begin
-  app = HelloStoreApp.new
-  app.start
-rescue => e
-  puts "hello_store: #{e.message}"
 end

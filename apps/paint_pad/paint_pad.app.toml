@@ -15,7 +15,7 @@ default_window_pos_y = 30
 # Keys the store reads. The device's TOML readers look keys up by name, so
 # these are ignored there (spec.md 3.1).
 app_id = "paint_pad"
-app_version = "1.0.0"
+app_version = "1.1.0"
 app_author = "family-mruby"
 app_description = "Draw with the mouse, clear with the right button"
 app_description_ja = "マウスで描いて、右ボタンで消す"
