@@ -2,6 +2,9 @@
 A	hello_store	1.1.0	Hello Store	こんにちは	The smallest app the store can carry	店が運べる一番小さなアプリ	demo	family-mruby	retro,modern,web					714b35fa8e4e3610f4e8aa9a5ce1bce691ef7df47856e2da5e76fbc2c15151c8	apps/hello_store/	hello_store.thumb.png	460
 F	hello_store.app.toml	620
 F	hello_store.app.rb	1230
+A	lottery	1.0.0	Lottery	ちゅうせん	Draw names from /home/lottery/names.txt with a roulette; winners are kept out of later draws	/home/lottery/names.txt の名前からルーレットで抽選。当たった人は次から外れる	tool	Family mruby	modern,web	400	240			90d6636aba91d1c50062e94482c4a2f7e4457d14932c93a0305b424e71388210	apps/lottery/	lottery.thumb.png	587
+F	lottery.app.toml	807
+F	lottery.app.rb	20925
 A	paint_pad	1.1.0	Paint Pad	おえかき	Draw with the mouse, clear with the right button	マウスで描いて、右ボタンで消す	tool	family-mruby	retro,modern,web	320	240			e342e4a7ee95989d45cb4dbec80ae101542d304153c159ef3bd66b8572baf2e5	apps/paint_pad/	paint_pad.thumb.png	818
 F	paint_pad.app.toml	1079
 F	paint_pad.app.rb	2111

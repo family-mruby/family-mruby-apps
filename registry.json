@@ -38,6 +38,44 @@
       ]
     },
     {
+      "id": "lottery",
+      "version": "1.0.0",
+      "name": "Lottery",
+      "name_ja": "ちゅうせん",
+      "description": "Draw names from /home/lottery/names.txt with a roulette; winners are kept out of later draws",
+      "description_ja": "/home/lottery/names.txt の名前からルーレットで抽選。当たった人は次から外れる",
+      "category": "tool",
+      "author": "Family mruby",
+      "license": "MIT",
+      "source": "https://github.com/family-mruby/family-mruby-apps",
+      "env": [
+        "modern",
+        "web"
+      ],
+      "min_width": 400,
+      "min_height": 240,
+      "base": "apps/lottery/",
+      "sha256": "90d6636aba91d1c50062e94482c4a2f7e4457d14932c93a0305b424e71388210",
+      "image": {
+        "path": "lottery.png",
+        "size": 11888
+      },
+      "thumb": {
+        "path": "lottery.thumb.png",
+        "size": 587
+      },
+      "files": [
+        {
+          "path": "lottery.app.toml",
+          "size": 807
+        },
+        {
+          "path": "lottery.app.rb",
+          "size": 20925
+        }
+      ]
+    },
+    {
       "id": "paint_pad",
       "version": "1.1.0",
       "name": "Paint Pad",

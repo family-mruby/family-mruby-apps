@@ -1,0 +1,21 @@
+# Keys the device itself reads.
+app_screen_name = "Lottery"
+app_screen_name_ja = "ちゅうせん"
+default_window_mode = "fullscreen"
+# Lays itself out from the size it is given, so a 640x360 screen stays
+# 640x360 and a 426x240 one stays 426x240.
+fullscreen_any_size = true
+single_instance = true
+
+# Keys the store reads.
+app_id = "lottery"
+app_version = "1.0.0"
+app_author = "Family mruby"
+app_description = "Draw names from /home/lottery/names.txt with a roulette; winners are kept out of later draws"
+app_description_ja = "/home/lottery/names.txt の名前からルーレットで抽選。当たった人は次から外れる"
+app_category = "tool"
+app_env = ["modern", "web"]
+app_min_width = 400
+app_min_height = 240
+app_license = "MIT"
+app_source = "https://github.com/family-mruby/family-mruby-apps"
