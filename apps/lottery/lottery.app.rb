@@ -16,24 +16,51 @@
 #   L                       read names.txt again
 #   Esc                     close
 #
+# Logo (optional): a picture at /home/lottery/logo.png (a PNG, or an 8-bit
+# BMP under that name) is shown small by the title and large on the card
+# before the first draw. It is scaled by whole steps (1/2, 1/3, ... or 2x,
+# 3x) to fit, and can have up to 65,536 pixels (256x256 or e.g. 320x200);
+# transparent parts (alpha below 128) are left out. With no file the app
+# looks as without it. L reads it again too.
+#
 # Drawing: the whole screen is drawn when something other than the name
-# changes; while the roulette spins only the name card is redrawn. Two small
+# card changes; while the roulette spins or a winner is shown only the card
+# is redrawn, about 30 times a second. While it spins a wheel of coloured
+# slices turns behind the name (fill_arc), slowing down with the roulette,
+# with lights round the rim and a pointer on top. When it stops the name
+# card flips (its width follows a cosine), the screen shakes, the name zooms
+# in through the text sizes with a small bounce of the card, rays (fill_arc
+# wedges) turn behind it, confetti falls and the border flashes. Text cannot
+# be rotated, so the turning is the wheel's and the rays'. Two small
 # characters (sprites, drawn from the pixel art below) walk along the strip
 # under the card, run while it spins and jump when a winner is shown. The
 # timing is wall-clock time (Machine.board_millis), not frames.
 #
 # Sound: the APU through FmrbAudio#note_on / #note_off -- a short tick for
-# each name shown and a short fanfare when the roulette stops.
+# each name shown, and a noise burst and a short fanfare when the roulette
+# stops.
 
 class LotteryApp < FmrbApp
   DIR = "/home/lottery"
   NAMES = "/home/lottery/names.txt"
   WINNERS = "/home/lottery/winners.txt"
+  LOGO = "/home/lottery/logo.png"
+  LOGO_MAX = 65536      # pixels the picture store takes
 
   SPIN_MS = 4500        # how long the roulette runs
   FIRST_GAP_MS = 45     # time between names at the start
   SLOW_MS = 420         # added to the gap by the end
   TICK_MS = 25          # length of one tick
+  FRAME_MS = 33         # the card's frame time while it moves
+  SLOW_FRAME_MS = 66    # ... once the reveal has settled
+  WHEEL_TURN = 1500     # degrees the wheel turns during a draw
+  FLIP_MS = 420         # the reveal: the card flips,
+  ZOOM_MS = 360         # then the name zooms in (sizes 1 to 4),
+  BOUNCE_MS = 160       # then the card bounces once
+  FX_MS = 3600          # confetti and the flashing border last this long
+  CHEER_MS = 2500       # the characters jump higher this long
+  NOISE_MS = 160        # the noise burst at the reveal
+  CONFETTI = 30         # pieces
 
   # Colours (RGB332). The screen is the app's own picture, so the colours
   # are chosen here rather than taken from the theme.
@@ -51,6 +78,16 @@ class LotteryApp < FmrbApp
   COL_BTN = 0x6D
   COL_BTN_YES = 0xC4
   SPRITE_KEY = 0x00     # transparent in the sprites; nothing in them is 0x00
+  COL_STAGE = 0x21      # the card's ground while it spins / shows a winner
+  COL_RAY_BG = 0xA0     # the disc behind the rays
+  COL_RAY = 0xF8        # the rays
+  COL_LAMP_ON = 0xFC
+  COL_LAMP_OFF = 0x6D
+  # the wheel's slices, two rounds of six
+  SLICES = [0xE0, 0xF4, 0xFC, 0x1C, 0x1F, 0x63, 0xE0, 0xF4, 0xFC, 0x1C, 0x1F, 0x63]
+  CONFETTI_COLS = [0xE0, 0xFC, 0x1C, 0x1F, 0xE3, 0xFF, 0xF4, 0x9F]
+  FLASH_COLS = [0xF8, 0xE0, 0xFF, 0x1C]
+  SHAKE = [4, -3, 3, -4, 2, -2, 1, -1, 0]
 
   # Fanfare: [frequency Hz, ms] on the second pulse channel, the last note
   # held over a triangle an octave down.
@@ -147,6 +184,17 @@ class LotteryApp < FmrbApp
     @tick_off_at = 0
     @fan_i = -1
     @fan_at = 0
+    @noise_off_at = 0
+    @frame_at = 0
+    @fx_at = 0
+    @wheel_deg = 0
+    @tick_n = 0
+    @nl_name = nil        # the name whose layout is in @nl_*
+    @cf_x = []            # confetti: x in the card, start y, speed, colour
+    @cf_y = []
+    @cf_v = []
+    @cf_c = []
+    @logo = nil
     @sprites = []
     @images = []
     @hits = FmrbUI::HitAreas.new
@@ -190,6 +238,50 @@ class LotteryApp < FmrbApp
     rebuild_candidates
     @state = @names.size == 0 ? :empty : :idle
     @shown = nil
+    load_logo
+  end
+
+  # The optional logo: only its size is read here (the head of the file);
+  # draw_picture reads the picture onto the display side the first time it
+  # is drawn, and again when the file changes.
+  def load_logo
+    @logo = nil
+    info = @gfx.picture_info(LOGO)
+    return unless info
+    w = info[:width].to_i
+    h = info[:height].to_i
+    return if w <= 0 || h <= 0
+    if w * h > LOGO_MAX
+      puts "lottery: #{LOGO} is #{w}x#{h}; up to #{LOGO_MAX} pixels (256x256) can be shown"
+      return
+    end
+    @logo = LOGO
+    @logo_w = w
+    @logo_h = h
+  end
+
+  # [scale, width, height] for the logo inside bw x bh: the largest whole
+  # step that fits (2x .. 4x up, 1/2 .. 1/32 down).
+  def logo_fit(bw, bh)
+    w = @logo_w
+    h = @logo_h
+    if w <= bw && h <= bh
+      s = bw / w
+      s = bh / h if bh / h < s
+      s = 4 if s > 4
+      s = 1 if s < 1
+      return [s, w * s, h * s]
+    end
+    s = (w + bw - 1) / bw
+    sh = (h + bh - 1) / bh
+    s = sh if sh > s
+    s = 2 if s < 2
+    s = 32 if s > 32
+    [-s, (w + s - 1) / s, (h + s - 1) / s]
+  end
+
+  def draw_logo(x, y, fit)
+    @gfx.draw_picture(@logo, x, y, scale: fit[0])
   end
 
   # Everyone in names.txt, less one entry for each line of winners.txt.
@@ -249,7 +341,24 @@ class LotteryApp < FmrbApp
     @card_y = @bar_h + @m
     @card_w = @main_w
     @card_h = @stage_y - @m - @card_y
+    @wheel_r = @card_h / 2 - 12           # room for the lamps and the pointer
+    @nl_name = nil
+    make_lamps
     make_sprites
+  end
+
+  # The lamps round the wheel: fixed places, lit in turn.
+  def make_lamps
+    @lamp_dx = []
+    @lamp_dy = []
+    r = @wheel_r + 6
+    i = 0
+    while i < 16
+      a = ::Math::PI * 2 * i / 16
+      @lamp_dx << (::Math.cos(a) * r).round
+      @lamp_dy << (::Math.sin(a) * r).round
+      i += 1
+    end
   end
 
   # ---- drawing ----------------------------------------------------------
@@ -272,7 +381,12 @@ class LotteryApp < FmrbApp
   def draw_bar
     small_font
     @gfx.fill_rect(0, 0, @w, @bar_h, COL_BAR)
-    @gfx.draw_text(@m, 3, tr("ちゅうせん", "Lottery"), COL_GOLD)
+    tx = @m
+    if @logo
+      fit = logo_fit(@bar_h * 4, @bar_h - 4)
+      tx += fit[1] + 6 if draw_logo(@m, (@bar_h - fit[2]) / 2, fit)
+    end
+    @gfx.draw_text(tx, 3, tr("ちゅうせん", "Lottery"), COL_GOLD)
     if @names.size > 0
       s = tr("のこり #{@cands.size} / #{@names.size} 人", "#{@cands.size} of #{@names.size} left")
       @gfx.draw_text(@panel_x - @m - @gfx.text_width(s), 3, s, COL_TEXT)
@@ -333,8 +447,7 @@ class LotteryApp < FmrbApp
     case @state
     when :empty then draw_card_empty
     when :confirm then draw_card_confirm
-    when :result then draw_card_name(@winner, COL_WIN, true)
-    when :spin then draw_card_name(@shown, COL_SPIN, false)
+    when :result, :spin then draw_stage(Machine.board_millis)
     else draw_card_idle
     end
   end
@@ -358,6 +471,8 @@ class LotteryApp < FmrbApp
     card_lines([first, "", NAMES,
                 tr("に 1 行に 1 人ずつ書いてください", "one name per line"),
                 tr("(# で始まる行と空の行は読みません)", "(# lines and blank lines are skipped)"),
+                tr("ブラウザ版: 画面の下の Add の Files... で", "In the browser: Add - Files... under the screen,"),
+                tr("into を /home/lottery にして入れます", "into /home/lottery"),
                 "", tr("L キーかタップで読み直します", "L or tap to read it again")], COL_SPIN)
   end
 
@@ -366,6 +481,19 @@ class LotteryApp < FmrbApp
     if @cands.size == 0
       card_lines([tr("全員が当選しました", "Everyone has won"),
                   tr("R でリセットできます", "R puts everyone back")], COL_SPIN)
+    elsif @logo
+      # the logo large, the word under it
+      s = tr("ちゅうせん", "Ready")
+      @gfx.set_font(:ja, 16)
+      @gfx.set_text_size(2)
+      th = 32
+      bh = @card_h - th - 24
+      fit = logo_fit(@card_w - 24, bh)
+      ok = draw_logo(@card_x + (@card_w - fit[1]) / 2, @card_y + 8 + (bh - fit[2]) / 2, fit)
+      @gfx.set_text_size(2)
+      ty = ok ? @card_y + @card_h - th - 10 : @card_y + (@card_h - th) / 2
+      @gfx.draw_text(@card_x + (@card_w - @gfx.text_width(s)) / 2, ty, s, COL_SPIN)
+      @gfx.set_text_size(1)
     else
       big_name(tr("ちゅうせん", "Ready"), COL_SPIN)
     end
@@ -391,14 +519,223 @@ class LotteryApp < FmrbApp
     @hits.add(:no, x2, by, bw, bh)
   end
 
-  def draw_card_name(name, color, won)
-    card_frame(won ? COL_GOLD : COL_CARD_EDGE)
-    if won
-      small_font
-      s = tr("おめでとう!", "Congratulations!")
-      @gfx.draw_text(@card_x + (@card_w - @gfx.text_width(s)) / 2, @card_y + 8, s, COL_CHEER)
+  # ---- the stage: the card while it spins and when a winner is shown -----
+
+  # The card's picture for this moment. The wheel (spin) or the rays
+  # (result) turn behind the plate with the name; the reveal's shake, flip,
+  # zoom, bounce, confetti and flashing border are worked out from the time
+  # since the roulette stopped. Draws only; the caller presents.
+  def draw_stage(now)
+    won = @state == :result
+    t = won ? now - @fx_at : -1
+    ox = 0
+    oy = 0
+    if t >= 0 && t < SHAKE.size * 45
+      ox = SHAKE[t / 45]
+      oy = SHAKE[(t / 45 + 3) % SHAKE.size]
     end
-    big_name(name || "", color)
+    @gfx.fill_rect(@card_x - 4, @card_y - 4, @card_w + 8, @card_h + 8, COL_BG)
+    x = @card_x + ox
+    y = @card_y + oy
+    if won
+      edge = t < FX_MS ? FLASH_COLS[(t / 90) % FLASH_COLS.size] : COL_GOLD
+    else
+      edge = @tick_n % 2 == 0 ? COL_GOLD : COL_CARD_EDGE
+    end
+    @gfx.fill_round_rect(x, y, @card_w, @card_h, 8, edge)
+    @gfx.fill_round_rect(x + 3, y + 3, @card_w - 6, @card_h - 6, 6, COL_STAGE)
+    cx = x + @card_w / 2
+    cy = y + @card_h / 2
+    if won
+      draw_rays(cx, cy, t)
+      draw_confetti(x, y, t) if t < FX_MS  # behind the name: it stays readable
+      draw_plate(cx, cy, @winner || "", COL_WIN, t)
+      draw_cheer(cx, y, t) if t >= FLIP_MS
+    else
+      draw_wheel(cx, cy)
+      draw_plate(cx, cy, @shown || "", COL_SPIN, -1)
+    end
+  end
+
+  def draw_wheel(cx, cy)
+    r = @wheel_r
+    a = @wheel_deg % 360
+    i = 0
+    while i < 12
+      a0 = a + i * 30
+      @gfx.fill_arc(cx, cy, 0, r, a0, a0 + 30, SLICES[i])
+      i += 1
+    end
+    @gfx.draw_circle(cx, cy, r, COL_GOLD)
+    @gfx.draw_circle(cx, cy, r + 1, COL_GOLD)
+    lr = @big ? 3 : 2
+    i = 0
+    while i < 16
+      c = (i + @tick_n) % 3 == 0 ? COL_LAMP_ON : COL_LAMP_OFF
+      @gfx.fill_circle(cx + @lamp_dx[i], cy + @lamp_dy[i], lr, c)
+      i += 1
+    end
+    # the pointer on top
+    pw = @big ? 10 : 7
+    ty = cy - r - 10
+    @gfx.fill_triangle(cx - pw, ty, cx + pw, ty, cx, ty + pw * 2, COL_CARD)
+    @gfx.draw_triangle(cx - pw, ty, cx + pw, ty, cx, ty + pw * 2, COL_WIN)
+  end
+
+  def draw_rays(cx, cy, t)
+    r = @wheel_r + 8
+    @gfx.fill_circle(cx, cy, r, COL_RAY_BG)
+    a = (t * 40 / 1000) % 360             # 40 degrees a second
+    i = 0
+    while i < 8
+      a0 = a + i * 45
+      @gfx.fill_arc(cx, cy, 0, r, a0, a0 + 22, COL_RAY)
+      i += 1
+    end
+  end
+
+  # The plate with the name, centred on (cx, cy). t < 0: spinning, the name
+  # at its size. t >= 0: the reveal -- flip (no name), zoom, bounce.
+  def draw_plate(cx, cy, name, color, t)
+    name_layout(name)
+    size = @nl_size
+    back = false
+    wf = 1000                             # the plate's width, per mille
+    grow = 0
+    if t < 0
+      size = 3 if size > 3 && !@big       # a small screen: leave some wheel showing
+    elsif t < FLIP_MS
+      c = ::Math.cos(::Math::PI * 3 * t / FLIP_MS)
+      back = c < 0
+      wf = (c.abs * 1000).to_i
+      size = 0
+    elsif t >= 0 && t < FLIP_MS + ZOOM_MS
+      cap = 1 + (t - FLIP_MS) * 4 / ZOOM_MS
+      size = cap if cap < size
+    elsif t >= 0 && t < FLIP_MS + ZOOM_MS + BOUNCE_MS
+      grow = @big ? 10 : 6
+    end
+    s = size < 1 ? @nl_size : size        # the plate's size even while flipping
+    n = @nl_lines.size
+    lh = 16 * s + 4
+    th = n * lh - 4
+    pw = @nl_wmax * s + 32 + grow * 2
+    min = @card_w * 45 / 100
+    pw = min if pw < min
+    pw = @card_w - 10 if pw > @card_w - 10
+    ph = th + 16 + grow * 2
+    pw = pw * wf / 1000
+    pw = 6 if pw < 6
+    px = cx - pw / 2
+    py = cy - ph / 2
+    edge = t < 0 ? (@tick_n % 2 == 0 ? COL_WIN : COL_CARD_EDGE) : COL_GOLD
+    @gfx.fill_round_rect(px - 2, py - 2, pw + 4, ph + 4, 8, edge)
+    @gfx.fill_round_rect(px, py, pw, ph, 6, back ? COL_GOLD : COL_CARD)
+    return if size < 1
+    @gfx.set_font(:ja, 16)
+    @gfx.set_text_size(size)
+    lh = 16 * size + 4
+    y = cy - (n * lh - 4) / 2
+    i = 0
+    while i < n
+      @gfx.draw_text(cx - @nl_w1[i] * size / 2, y, @nl_lines[i], color)
+      y += lh
+      i += 1
+    end
+    @gfx.set_text_size(1)
+  end
+
+  def draw_cheer(cx, y, t)
+    s = tr("おめでとう!", "Congratulations!")
+    @gfx.set_font(:ja, 16)
+    sz = @big ? 2 : 1
+    @gfx.set_text_size(sz)
+    w = @gfx.text_width(s)
+    c = t < FX_MS ? FLASH_COLS[(t / 180) % 2] : COL_GOLD
+    @gfx.draw_text(cx - w / 2, y + 6, s, c, COL_STAGE)
+    @gfx.set_text_size(1)
+  end
+
+  def start_confetti
+    @cf_x = []
+    @cf_y = []
+    @cf_v = []
+    @cf_c = []
+    i = 0
+    while i < CONFETTI
+      @cf_x << 6 + rand(@card_w - 16)
+      @cf_y << -rand(@card_h * 2 / 3)      # start above the top
+      @cf_v << @card_h * (45 + rand(50)) / 100   # px a second
+      @cf_c << CONFETTI_COLS[i % CONFETTI_COLS.size]
+      i += 1
+    end
+  end
+
+  def draw_confetti(x, y, t)
+    lo = 4
+    hi = @card_h - 8
+    i = 0
+    while i < @cf_x.size
+      py = @cf_y[i] + @cf_v[i] * t / 1000
+      if py >= lo && py <= hi
+        p = (t / 25 + i * 7) % 24            # a sway left and right
+        dx = (p < 12 ? p : 24 - p) / 2 - 3
+        if (t / 120 + i) % 2 == 0           # flutter: tall, then wide
+          @gfx.fill_rect(x + @cf_x[i] + dx, y + py, 3, 6, @cf_c[i])
+        else
+          @gfx.fill_rect(x + @cf_x[i] + dx, y + py + 1, 6, 3, @cf_c[i])
+        end
+      end
+      i += 1
+    end
+  end
+
+  # How the name is laid out at its largest (the same rule as big_name),
+  # kept until the name or the layout changes: @nl_size, @nl_lines, the
+  # width of each line at size 1 (@nl_w1) and the widest (@nl_wmax).
+  def name_layout(name)
+    return if @nl_name == name
+    @gfx.set_font(:ja, 16)
+    @gfx.set_text_size(1)
+    avail = @card_w - 16
+    hmax = (@card_h - @lh * 2) / 16
+    w1 = @gfx.text_width(name)
+    w1 = 1 if w1 < 1
+    size = avail / w1
+    size = hmax if size > hmax
+    size = 4 if size > 4
+    lines = nil
+    if size < 2 || (size < 4 && w1 > avail / 2)
+      two = (hmax - 1) / 2
+      two = 4 if two > 4
+      while two > size
+        @gfx.set_text_size(two)
+        l2 = @gfx.wrap_text(name, avail)
+        if l2.size == 2 && fits_whole(name, l2)
+          lines = l2
+          size = two
+          break
+        end
+        two -= 1
+      end
+      @gfx.set_text_size(1)
+    end
+    size = 1 if size < 1
+    if lines.nil?
+      lines = [size == 1 ? @gfx.fit_text(name, avail, "..") : name]
+    end
+    @nl_w1 = []
+    @nl_wmax = 0
+    i = 0
+    while i < lines.size
+      w = @gfx.text_width(lines[i])
+      @nl_w1 << w
+      @nl_wmax = w if w > @nl_wmax
+      i += 1
+    end
+    @nl_lines = lines
+    @nl_size = size
+    @nl_name = name
   end
 
   # The name as large as fits the card: the 16 px font at 1x to 4x on one
@@ -463,25 +800,51 @@ class LotteryApp < FmrbApp
     @state = :spin
     @spin_at = now
     @next_switch = now
+    @frame_at = 0
+    @wheel_deg = rand(360)
+    @wheel_from = @wheel_deg
     @fan_i = -1
     sound_off
     draw_hint
     @gfx.present
   end
 
+  # One step of the roulette: a new name when its time has come (with a
+  # tick), and the card again every FRAME_MS for the wheel. The wheel's
+  # angle is the integral of a speed falling as (1 - f)^2, so it stops
+  # turning just as the roulette stops. true when it drew.
   def spin_step(now)
-    return if now < @next_switch
     elapsed = now - @spin_at
     if elapsed >= SPIN_MS
       finish_spin(now)
-      return
+      return true
     end
-    @shown = pick_other(@shown)
-    f = elapsed * 100 / SPIN_MS           # 0..99
-    @next_switch = now + FIRST_GAP_MS + SLOW_MS * f * f / 10000
-    draw_card_name(@shown, COL_SPIN, false)
-    @gfx.present
-    tick(now, 1400 + f * 4)
+    g = 1000 - elapsed * 1000 / SPIN_MS   # 1000..1
+    g3 = g * g / 1000 * g / 1000
+    @wheel_deg = @wheel_from + WHEEL_TURN - WHEEL_TURN * g3 / 1000
+    changed = false
+    if now >= @next_switch
+      @shown = pick_other(@shown)
+      f = elapsed * 100 / SPIN_MS         # 0..99
+      @next_switch = now + FIRST_GAP_MS + SLOW_MS * f * f / 10000
+      @tick_n += 1
+      tick(now, 1400 + f * 4)
+      changed = true
+    end
+    return false unless changed || now - @frame_at >= FRAME_MS
+    @frame_at = now
+    draw_stage(now)
+    true
+  end
+
+  # The reveal goes on being drawn: fast while it moves, slower once only
+  # the rays turn.
+  def result_step(now)
+    gap = now - @fx_at < FX_MS ? FRAME_MS : SLOW_FRAME_MS
+    return false if now - @frame_at < gap
+    @frame_at = now
+    draw_stage(now)
+    true
   end
 
   def pick_other(prev)
@@ -495,8 +858,13 @@ class LotteryApp < FmrbApp
   def finish_spin(now)
     @state = :result
     @shown = @winner
+    @fx_at = now
+    @frame_at = now
     save_winner(@winner)
+    start_confetti
     draw_all
+    @audio.note_on_raw(FmrbAudio::CH_NOISE, 2000, 9, 0, 0)
+    @noise_off_at = now + NOISE_MS
     start_fanfare(now)
   end
 
@@ -527,6 +895,10 @@ class LotteryApp < FmrbApp
       @audio.note_off(FmrbAudio::CH_PULSE1)
       @tick_off_at = 0
     end
+    if @noise_off_at > 0 && now >= @noise_off_at
+      @audio.note_off(FmrbAudio::CH_NOISE)
+      @noise_off_at = 0
+    end
     return if @fan_i < 0 || now < @fan_at
     @fan_i += 1
     if @fan_i >= FANFARE.size
@@ -543,7 +915,9 @@ class LotteryApp < FmrbApp
     @audio.note_off(FmrbAudio::CH_PULSE1)
     @audio.note_off(FmrbAudio::CH_PULSE2)
     @audio.note_off(FmrbAudio::CH_TRIANGLE)
+    @audio.note_off(FmrbAudio::CH_NOISE)
     @tick_off_at = 0
+    @noise_off_at = 0
     @fan_i = -1
   end
 
@@ -616,10 +990,10 @@ class LotteryApp < FmrbApp
   end
 
   # Walk (idle), run and hop (spin), jump with arms up (result). Speeds are
-  # in px per second, positions follow the wall clock.
+  # in px per second, positions follow the wall clock. true when they moved.
   def sprite_step(now)
     dt = now - @sprite_at
-    return if dt < (@state == :idle ? 80 : 33)
+    return false if dt < (@state == :idle ? 80 : 33)
     @sprite_at = now
     dt = 100 if dt > 100
     speed = @state == :spin ? 70 * @px : 12 * @px
@@ -652,7 +1026,8 @@ class LotteryApp < FmrbApp
       if @state == :result
         ph = (now / 2 + i * 120) % 300   # a jump every 600 ms
         hop = ph < 150 ? ph : 300 - ph
-        y -= hop * @px * 3 / 150
+        high = now - @fx_at < CHEER_MS ? 7 : 3   # higher just after the reveal
+        y -= hop * @px * high / 150
         frame = 2
       elsif @state == :spin
         ph = (now + i * 90) % 240
@@ -667,7 +1042,7 @@ class LotteryApp < FmrbApp
       sp.move(x / 16, y)
       i += 1
     end
-    @gfx.present
+    true
   end
 
   # ---- events -----------------------------------------------------------
@@ -738,11 +1113,20 @@ class LotteryApp < FmrbApp
 
   def on_update
     now = Machine.board_millis
-    spin_step(now) if @state == :spin
+    drew = false
+    if @state == :spin
+      drew = spin_step(now)
+    elsif @state == :result
+      drew = result_step(now)
+    end
     sound_step(now)
-    sprite_step(now)
-    if @state == :spin || @fan_i >= 0 || @tick_off_at > 0
+    drew = true if sprite_step(now)
+    @gfx.present if drew                  # one present for the card and the sprites
+    if @state == :spin || @fan_i >= 0 || @tick_off_at > 0 ||
+       (@state == :result && now - @fx_at < FX_MS)
       10
+    elsif @state == :result
+      30
     else
       60
     end

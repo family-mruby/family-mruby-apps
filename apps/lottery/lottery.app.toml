@@ -9,7 +9,7 @@ single_instance = true
 
 # Keys the store reads.
 app_id = "lottery"
-app_version = "1.0.0"
+app_version = "1.1.0"
 app_author = "Family mruby"
 app_description = "Draw names from /home/lottery/names.txt with a roulette; winners are kept out of later draws"
 app_description_ja = "/home/lottery/names.txt の名前からルーレットで抽選。当たった人は次から外れる"
